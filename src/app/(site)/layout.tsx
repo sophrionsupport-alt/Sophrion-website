@@ -1,12 +1,10 @@
-// src/app/(site)/layout.tsx
 import type { Metadata, Viewport } from "next";
 import SiteHeader from "@/components/layout/SiteHeader";
 import SiteFooter from "@/components/layout/SiteFooter";
 
 const SITE_NAME = "Sophrion";
 const SITE_URL = "https://sophrion.in";
-const BRAND_TAGLINE = "Institutional Readiness Intelligence System";
-const DEFAULT_TITLE = `${SITE_NAME} — ${BRAND_TAGLINE}`;
+const DEFAULT_TITLE = "Sophrion - Future Within";
 const DEFAULT_DESCRIPTION =
   "Sophrion is an Institutional Readiness Intelligence System that helps colleges and students align outcomes with industry expectations through structured readiness pathways, measurable reporting, and scalable campus-industry bridge infrastructure.";
 
@@ -19,7 +17,10 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: { default: DEFAULT_TITLE, template: `%s | ${SITE_NAME}` },
+  title: {
+  default: "Sophrion - Future Within",
+  template: `%s - Sophrion`,
+},
   description: DEFAULT_DESCRIPTION,
   applicationName: SITE_NAME,
   authors: [{ name: SITE_NAME, url: SITE_URL }],
@@ -54,10 +55,6 @@ export const metadata: Metadata = {
     description: DEFAULT_DESCRIPTION,
     images: ["/og.jpg"],
   },
-  icons: {
-    icon: [{ url: "/favicon.ico" }, { url: "/icon.png", type: "image/png" }],
-    apple: [{ url: "/apple-touch-icon.png" }],
-  },
   formatDetection: { email: false, address: false, telephone: false },
   category: "Education",
 };
@@ -65,7 +62,6 @@ export const metadata: Metadata = {
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen">
-      {/* Ambient color layer (safe, doesn’t override your globals.css bg) */}
       <div
         aria-hidden="true"
         className="pointer-events-none fixed inset-0 -z-10 opacity-70"

@@ -1,4 +1,3 @@
-// src/app/layout.tsx
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -20,16 +19,23 @@ const TAGLINE = "Future Within";
 const DESCRIPTION = "Institutional Readiness Intelligence System";
 const SITE_URL = "https://sophrion.in";
 
-
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-  default: `${SITE_NAME} | ${TAGLINE}`,
-  template: `%s | ${SITE_NAME}`,
+    default: `${SITE_NAME} | ${TAGLINE}`,
+    template: `%s | ${SITE_NAME}`,
   },
   description: DESCRIPTION,
   applicationName: SITE_NAME,
   alternates: { canonical: "/" },
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icon.png", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png" }],
+    shortcut: ["/favicon.ico"],
+  },
   openGraph: {
     title: SITE_NAME,
     description: DESCRIPTION,
