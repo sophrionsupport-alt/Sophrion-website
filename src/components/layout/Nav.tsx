@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Plus, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import SignOutButton from "@/components/auth/SignOutButton";
 
 type NavLink = {
   label: string;
@@ -38,11 +39,6 @@ const adminQuickLinks = [
     href: "/admin/blog/new",
     primary: false,
   },
-  {
-    title: "College requests",
-    href: "/admin/college-requests",
-    primary: false,
-  },
 ];
 
 type Props = {
@@ -62,7 +58,9 @@ export default function Nav({
 
   return (
     <div className={cn("flex min-w-0 flex-1 items-center justify-end gap-3", className)}>
-      <nav className="flex min-w-0 max-w-full items-center gap-1 overflow-x-auto scrollbar-none">
+      
+      {/* Main Links */}
+      <nav className="flex min-w-0 flex-nowrap items-center justify-end gap-1 overflow-x-auto scrollbar-none">
         {links.map((item) => {
           const active =
             pathname === item.href ||
@@ -73,10 +71,10 @@ export default function Nav({
               key={item.href}
               href={item.href}
               className={cn(
-                "shrink-0 rounded-xl px-3 py-2 text-sm font-medium transition",
+                "shrink-0 rounded-lg px-2.5 py-1.5 text-sm font-medium transition-colors",
                 active
-                  ? "bg-white/8 text-white"
-                  : "text-foreground/70 hover:bg-white/5 hover:text-foreground"
+                  ? "bg-white/10 text-white"
+                  : "text-foreground/72 hover:bg-white/6 hover:text-foreground"
               )}
             >
               {item.label}
@@ -85,8 +83,10 @@ export default function Nav({
         })}
       </nav>
 
+      {/* Admin Actions */}
       {isAdminRoute && (
         <div className="hidden items-center gap-2 lg:flex">
+
           {adminQuickLinks.map((item) => (
             <Link
               key={item.href}
@@ -125,6 +125,10 @@ export default function Nav({
               Refresh
             </button>
           )}
+
+          {/* Sign Out */}
+          <SignOutButton />
+
         </div>
       )}
     </div>

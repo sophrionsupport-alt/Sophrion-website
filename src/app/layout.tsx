@@ -16,14 +16,16 @@ const geistMono = Geist_Mono({
 });
 
 const SITE_NAME = "Sophrion";
-const SITE_URL = "https://sophrion.in";
+const TAGLINE = "Future Within";
 const DESCRIPTION = "Institutional Readiness Intelligence System";
+const SITE_URL = "https://sophrion.in";
+
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: SITE_NAME,
-    template: `%s | ${SITE_NAME}`,
+  default: `${SITE_NAME} | ${TAGLINE}`,
+  template: `%s | ${SITE_NAME}`,
   },
   description: DESCRIPTION,
   applicationName: SITE_NAME,
