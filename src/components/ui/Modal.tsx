@@ -6,31 +6,15 @@ function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
-type Props = {
+type ModalProps = {
   open: boolean;
   onClose: () => void;
   title?: string;
   description?: string;
   children: React.ReactNode;
   className?: string;
-  closeOnBackdrop?: boolean;
-  initialFocusRef?: React.RefObject<HTMLElement | null>;
+  bodyClassName?: string;
 };
-
-function getFocusable(container: HTMLElement) {
-  const selectors = [
-    'a[href]',
-    'button:not([disabled])',
-    'textarea:not([disabled])',
-    'input:not([disabled])',
-    'select:not([disabled])',
-    '[tabindex]:not([tabindex="-1"])',
-  ].join(",");
-
-  return Array.from(container.querySelectorAll<HTMLElement>(selectors)).filter(
-    (el) => !el.hasAttribute("disabled") && !el.getAttribute("aria-hidden")
-  );
-}
 
 export default function Modal({
   open,
@@ -39,148 +23,76 @@ export default function Modal({
   description,
   children,
   className,
-  closeOnBackdrop = true,
-  initialFocusRef,
-}: Props) {
-  const panelRef = React.useRef<HTMLDivElement>(null);
-  const lastActiveRef = React.useRef<HTMLElement | null>(null);
-  const onCloseRef = React.useRef(onClose);
-
-  const titleId = React.useId();
-  const descId = React.useId();
-
-  React.useEffect(() => {
-    onCloseRef.current = onClose;
-  }, [onClose]);
-
+  bodyClassName,
+}: ModalProps) {
   React.useEffect(() => {
     if (!open) return;
 
-    lastActiveRef.current = document.activeElement as HTMLElement | null;
-
-    const panel = panelRef.current;
-    if (panel) {
-      const focusables = getFocusable(panel);
-      const toFocus = initialFocusRef?.current || focusables[0] || panel;
-      toFocus.focus?.();
-    }
-
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onCloseRef.current();
-        return;
-      }
-
-      if (e.key !== "Tab") return;
-
-      const panelEl = panelRef.current;
-      if (!panelEl) return;
-
-      const focusables = getFocusable(panelEl);
-
-      if (focusables.length === 0) {
-        e.preventDefault();
-        panelEl.focus();
-        return;
-      }
-
-      const first = focusables[0];
-      const last = focusables[focusables.length - 1];
-
-      if (e.shiftKey) {
-        if (document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        }
-      } else {
-        if (document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
-    }
-
-    window.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", onKeyDown);
-      lastActiveRef.current?.focus?.();
-    };
-  }, [open, initialFocusRef]);
-
-  React.useEffect(() => {
-    if (!open) return;
-
-    const prev = document.body.style.overflow;
+    const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
     return () => {
-      document.body.style.overflow = prev;
+      document.body.style.overflow = originalOverflow;
     };
   }, [open]);
+
+  React.useEffect(() => {
+    if (!open) return;
+
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open, onClose]);
 
   if (!open) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 grid place-items-center px-4"
-      role="presentation"
-    >
-      <div
-        className="absolute inset-0 bg-black/65 backdrop-blur-sm"
-        onMouseDown={(e) => {
-          if (!closeOnBackdrop) return;
-          if (e.target === e.currentTarget) onCloseRef.current();
-        }}
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <button
+        type="button"
+        aria-label="Close modal overlay"
+        onClick={onClose}
+        className="fixed inset-0 bg-black/70 backdrop-blur-sm"
       />
 
-      <div
-        ref={panelRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={title ? titleId : undefined}
-        aria-describedby={description ? descId : undefined}
-        tabIndex={-1}
-        className={cn(
-          "relative w-full max-w-lg rounded-2xl border shadow-glow outline-none",
-          "border-white/10 bg-white/6 backdrop-blur-md",
-          "p-5 sm:p-6",
-          className
-        )}
-        onMouseDown={(e) => {
-          e.stopPropagation();
-        }}
-      >
-        {title || description ? (
-          <div className="mb-4 grid gap-1">
-            <div className="flex items-start justify-between gap-3">
+      <div className="relative flex min-h-full items-start justify-center p-3 sm:p-4">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={title ? "modal-title" : undefined}
+          aria-describedby={description ? "modal-description" : undefined}
+          className={cn(
+            "relative my-4 w-full max-w-2xl rounded-2xl border border-white/10 bg-[hsl(var(--card))] text-[hsl(var(--card-foreground))] shadow-2xl sm:my-8",
+            className
+          )}
+        >
+          {(title || description) && (
+            <div className="border-b border-white/10 px-5 py-4">
               {title ? (
-                <h3 id={titleId} className="text-lg font-semibold text-foreground">
+                <h2
+                  id="modal-title"
+                  className="text-lg font-semibold text-foreground"
+                >
                   {title}
-                </h3>
-              ) : (
-                <span />
-              )}
+                </h2>
+              ) : null}
 
-              <button
-                type="button"
-                onClick={() => onCloseRef.current()}
-                className="rounded-lg px-2 py-1 text-sm text-foreground/70 hover:bg-white/8 hover:text-foreground"
-              >
-                Close
-              </button>
+              {description ? (
+                <p
+                  id="modal-description"
+                  className="mt-1 text-sm text-muted-foreground"
+                >
+                  {description}
+                </p>
+              ) : null}
             </div>
+          )}
 
-            {description ? (
-              <p id={descId} className="text-sm text-foreground/70">
-                {description}
-              </p>
-            ) : null}
-          </div>
-        ) : null}
-
-        <div className="text-sm text-foreground/85">{children}</div>
+          <div className={cn("px-5 py-4", bodyClassName)}>{children}</div>
+        </div>
       </div>
     </div>
   );

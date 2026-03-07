@@ -15,19 +15,11 @@ const geistMono = Geist_Mono({
 });
 
 const SITE_NAME = "Sophrion";
-const TAGLINE = "Future Within";
-const DESCRIPTION = "Institutional Readiness Intelligence System";
 const SITE_URL = "https://sophrion.in";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: {
-    default: `${SITE_NAME} | ${TAGLINE}`,
-    template: `%s | ${SITE_NAME}`,
-  },
-  description: DESCRIPTION,
   applicationName: SITE_NAME,
-  alternates: { canonical: "/" },
   icons: {
     icon: [
       { url: "/favicon.ico" },
@@ -35,38 +27,6 @@ export const metadata: Metadata = {
     ],
     apple: [{ url: "/apple-touch-icon.png" }],
     shortcut: ["/favicon.ico"],
-  },
-  openGraph: {
-    title: SITE_NAME,
-    description: DESCRIPTION,
-    url: SITE_URL,
-    siteName: SITE_NAME,
-    type: "website",
-    images: [
-      {
-        url: "/og.jpg",
-        width: 1200,
-        height: 630,
-        alt: `${SITE_NAME} — Open Graph`,
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: SITE_NAME,
-    description: DESCRIPTION,
-    images: ["/og.jpg"],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-      "max-video-preview": -1,
-    },
   },
 };
 

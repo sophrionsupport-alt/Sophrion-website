@@ -25,7 +25,7 @@ export default function SiteHeader({ className }: Props) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 overflow-hidden transition-all duration-300",
+        "sticky top-0 z-50 transition-all duration-300",
         scrolled
           ? [
               "border-b border-white/12",
@@ -71,32 +71,34 @@ export default function SiteHeader({ className }: Props) {
         aria-hidden="true"
         className={cn(
           "pointer-events-none absolute inset-x-0 bottom-0 h-px transition-opacity duration-300",
-          scrolled ? "opacity-100 bg-white/12" : "opacity-60 bg-white/8"
+          scrolled ? "bg-white/12 opacity-100" : "bg-white/8 opacity-60"
         )}
       />
 
-      <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-2 sm:px-6 lg:px-8">
-        <Link
-          href={isAdminRoute ? "/admin" : "/"}
-          className="inline-flex shrink-0 items-center gap-3"
-        >
-          <img
-            src="/images/brand/symbol-logo.png"
-            alt="Sophrion"
-            className="h-9 w-9 object-contain"
-          />
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex min-h-17 items-center justify-between gap-4 py-3">
+          <Link
+            href={isAdminRoute ? "/admin" : "/"}
+            className="inline-flex min-w-0 shrink-0 items-center gap-3"
+          >
+            <img
+              src="/images/brand/symbol-logo.png"
+              alt="Sophrion"
+              className="h-9 w-9 object-contain"
+            />
 
-          <div className="leading-tight">
-            <div className="text-sm font-semibold text-foreground">
-              {isAdminRoute ? "Sophrion Admin" : "Sophrion"}
+            <div className="min-w-0 leading-tight">
+              <div className="truncate text-sm font-semibold text-foreground">
+                {isAdminRoute ? "Sophrion Admin" : "Sophrion"}
+              </div>
+              <div className="truncate text-xs text-foreground/60">
+                {isAdminRoute ? "Operations Console" : "Future Within"}
+              </div>
             </div>
-            <div className="text-xs text-foreground/60">
-              {isAdminRoute ? "Operations Console" : "Future Within"}
-            </div>
-          </div>
-        </Link>
+          </Link>
 
-        <Nav className="justify-end" />
+          <Nav className="flex-1 justify-end" />
+        </div>
       </div>
     </header>
   );

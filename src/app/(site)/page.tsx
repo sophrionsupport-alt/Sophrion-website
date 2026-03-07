@@ -186,12 +186,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* FOOTNOTE */}
-      <div className="mx-auto max-w-5xl px-6 pb-10">
-        <small className="text-foreground/50">
-          © {SITE_NAME}. All rights reserved.
-        </small>
-      </div>
     </main>
   );
 }

@@ -11,6 +11,7 @@
     --border: 220 22% 20%;
     --ring: 248 82% 62%;
     --cyan-500: 188 86% 48%;
+    --brand-600: 262 83% 58%;
 
     color-scheme: dark;
   }
@@ -34,7 +35,6 @@
   }
 }
 
-/* ✅ Tailwind v4 token mapping so classes like bg-background work */
 @theme {
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
@@ -45,6 +45,16 @@
   --color-border: hsl(var(--border));
   --color-ring: hsl(var(--ring));
 }
+
+@utility scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 @keyframes skeleton-shimmer {
   0% {
     transform: translateX(-60%);

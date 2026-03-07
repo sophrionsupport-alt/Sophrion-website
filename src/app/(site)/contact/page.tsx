@@ -62,7 +62,7 @@ export default function Page() {
               <InfoRow
                 icon={Phone}
                 title="Phone"
-                value="Add your support number"
+                value="8639998768"
               />
               <InfoRow
                 icon={MapPin}

@@ -1,0 +1,42 @@
+2026-03-07T14:39:49.171Z INFO Is remote: false
+2026-03-07T14:39:49.172Z INFO Starting Local. Installation path: c:\Users\hp\OneDrive\Desktop
+2026-03-07T14:39:49.173Z INFO [MainProvider] Creating new MainProvider instance...
+2026-03-07T14:39:49.174Z INFO [TabsManager] Code view listener set up at initialization
+2026-03-07T14:39:49.175Z INFO Installation path exists: c:\Users\hp\OneDrive\Desktop
+2026-03-07T14:39:49.176Z INFO Initializing database with URL: file:c:\Users\hp\OneDrive\Desktop\pythagora-core\data\database\pythagora.db
+2026-03-07T14:39:49.183Z INFO Database file exists, skipping prisma generate/push for faster startup
+2026-03-07T14:39:49.184Z INFO Database initialized successfully
+2026-03-07T14:39:49.185Z INFO [Migration] Checking for database migration...
+2026-03-07T14:39:49.365Z INFO [Migration] No migration needed
+2026-03-07T14:39:52.664Z INFO [TabsManager] First file opened, triggering split view
+2026-03-07T14:39:52.665Z INFO [MainProvider] First file opened, creating split view
+2026-03-07T14:40:00.476Z INFO [TabsManager] First file opened, triggering split view
+2026-03-07T14:40:00.477Z INFO [MainProvider] First file opened, creating split view
+2026-03-07T14:40:03.566Z INFO [TabsManager] First file opened, triggering split view
+2026-03-07T14:40:03.567Z INFO [MainProvider] First file opened, creating split view
+2026-03-07T14:47:13.568Z INFO Closing entire Pythagora extension...
+2026-03-07T14:47:13.579Z ERROR Error closing extension
+Error: Canceled
+Stack: Canceled: Canceled
+	at new iI (file:///c:/Users/hp/AppData/Local/Programs/Microsoft%20VS%20Code/61b3d0ab13/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:407:147604)
+	at r._remoteCall (file:///c:/Users/hp/AppData/Local/Programs/Microsoft%20VS%20Code/61b3d0ab13/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:407:153656)
+	at i.<computed>.s.charCodeAt.i.<computed> (file:///c:/Users/hp/AppData/Local/Programs/Microsoft%20VS%20Code/61b3d0ab13/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:407:150451)
+	at Jm._doExecuteCommand (file:///c:/Users/hp/AppData/Local/Programs/Microsoft%20VS%20Code/61b3d0ab13/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:494:48120)
+	at Jm.executeCommand (file:///c:/Users/hp/AppData/Local/Programs/Microsoft%20VS%20Code/61b3d0ab13/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:494:47567)
+	at Object.executeCommand (file:///c:/Users/hp/AppData/Local/Programs/Microsoft%20VS%20Code/61b3d0ab13/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:588:129159)
+	at closeEntirePythagoraExtension (c:\Users\hp\.vscode\extensions\pythagoratechnologies.pythagora-vs-code-2.6.19\out\extension.js:542:31)
+	at Object.deactivate (c:\Users\hp\.vscode\extensions\pythagoratechnologies.pythagora-vs-code-2.6.19\out\extension.js:409:15)
+	at lk._deactivate (file:///c:/Users/hp/AppData/Local/Programs/Microsoft%20VS%20Code/61b3d0ab13/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:498:14479)
+	at file:///c:/Users/hp/AppData/Local/Programs/Microsoft%20VS%20Code/61b3d0ab13/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:498:12006
+	at Array.map (<anonymous>)
+	at lk._deactivateAll (file:///c:/Users/hp/AppData/Local/Programs/Microsoft%20VS%20Code/61b3d0ab13/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:498:11994)
+	at lk.terminate (file:///c:/Users/hp/AppData/Local/Programs/Microsoft%20VS%20Code/61b3d0ab13/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:498:12345)
+	at r.terminate (file:///c:/Users/hp/AppData/Local/Programs/Microsoft%20VS%20Code/61b3d0ab13/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:500:1072)
+	at Os (file:///c:/Users/hp/AppData/Local/Programs/Microsoft%20VS%20Code/61b3d0ab13/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:780:11691)
+	at MessagePortMain.<anonymous> (file:///c:/Users/hp/AppData/Local/Programs/Microsoft%20VS%20Code/61b3d0ab13/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:780:8122)
+	at MessagePortMain.emit (node:events:519:28)
+	at MessagePortMain._internalPort.emit (node:electron/js2c/utility_init:2:2959)
+	at Object.callbackTrampoline (node:internal/async_hooks:130:17)
+Extra context: {
+  "message": "Canceled"
+}

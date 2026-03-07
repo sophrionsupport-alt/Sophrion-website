@@ -18,9 +18,9 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-  default: "Sophrion - Future Within",
-  template: `%s - Sophrion`,
-},
+    default: DEFAULT_TITLE,
+    template: `%s - Sophrion`,
+  },
   description: DEFAULT_DESCRIPTION,
   applicationName: SITE_NAME,
   authors: [{ name: SITE_NAME, url: SITE_URL }],
@@ -46,7 +46,12 @@ export const metadata: Metadata = {
     description: DEFAULT_DESCRIPTION,
     locale: "en_IN",
     images: [
-      { url: "/og.jpg", width: 1200, height: 630, alt: `${SITE_NAME} — OG Image` },
+      {
+        url: "/og.jpg",
+        width: 1200,
+        height: 630,
+        alt: `${SITE_NAME} — OG Image`,
+      },
     ],
   },
   twitter: {
@@ -61,7 +66,7 @@ export const metadata: Metadata = {
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <div
         aria-hidden="true"
         className="pointer-events-none fixed inset-0 -z-10 opacity-70"
