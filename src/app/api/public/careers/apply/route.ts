@@ -1,4 +1,3 @@
-// src/app/api/public/careers/apply/route.ts
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { CareerApplySchema } from "@/lib/validators/careers";
@@ -87,6 +86,7 @@ function buildCareerAcknowledgementEmail(input: {
 
   return { subject, html, text };
 }
+
 function buildAdminNotificationEmail(input: {
   fullName: string;
   email: string;
@@ -99,69 +99,72 @@ function buildAdminNotificationEmail(input: {
   const subject = `New career application — ${input.fullName}`;
 
   const html = `
-  <div style="font-family:Arial,Helvetica,sans-serif;line-height:1.6;color:#111827;">
-    <h2>New Sophrion Career Application</h2>
+    <div style="font-family:Arial,Helvetica,sans-serif;line-height:1.6;color:#111827;">
+      <h2>New Sophrion Career Application</h2>
 
-    <p><strong>Name:</strong> ${escapeHtml(input.fullName)}</p>
-    <p><strong>Email:</strong> ${escapeHtml(input.email)}</p>
+      <p><strong>Name:</strong> ${escapeHtml(input.fullName)}</p>
+      <p><strong>Email:</strong> ${escapeHtml(input.email)}</p>
 
-    ${
-      input.roleTitle
-        ? `<p><strong>Role:</strong> ${escapeHtml(input.roleTitle)}</p>`
-        : `<p><strong>Role:</strong> Builder Network</p>`
-    }
+      ${
+        input.roleTitle
+          ? `<p><strong>Role:</strong> ${escapeHtml(input.roleTitle)}</p>`
+          : `<p><strong>Role:</strong> Builder Network</p>`
+      }
 
-    ${
-      input.college
-        ? `<p><strong>College:</strong> ${escapeHtml(input.college)}</p>`
-        : ""
-    }
+      ${
+        input.college
+          ? `<p><strong>College:</strong> ${escapeHtml(input.college)}</p>`
+          : ""
+      }
 
-    ${
-      input.degree
-        ? `<p><strong>Degree:</strong> ${escapeHtml(input.degree)}</p>`
-        : ""
-    }
+      ${
+        input.degree
+          ? `<p><strong>Degree:</strong> ${escapeHtml(input.degree)}</p>`
+          : ""
+      }
 
-    ${
-      input.graduationYear
-        ? `<p><strong>Graduation Year:</strong> ${escapeHtml(input.graduationYear)}</p>`
-        : ""
-    }
+      ${
+        input.graduationYear
+          ? `<p><strong>Graduation Year:</strong> ${escapeHtml(
+              input.graduationYear
+            )}</p>`
+          : ""
+      }
 
-    ${
-      input.linkedin
-        ? `<p><strong>LinkedIn:</strong> <a href="${escapeHtml(
-            input.linkedin
-          )}">${escapeHtml(input.linkedin)}</a></p>`
-        : ""
-    }
+      ${
+        input.linkedin
+          ? `<p><strong>LinkedIn:</strong> <a href="${escapeHtml(
+              input.linkedin
+            )}">${escapeHtml(input.linkedin)}</a></p>`
+          : ""
+      }
 
-    <hr/>
+      <hr />
 
-    <p>
-      View in admin dashboard:
-      <br/>
-      <a href="https://sophrion.in/admin/career-applications">
-        Open applications dashboard
-      </a>
-    </p>
-  </div>
+      <p>
+        View in admin dashboard:
+        <br />
+        <a href="https://sophrion.in/admin/career-applications">
+          Open applications dashboard
+        </a>
+      </p>
+    </div>
   `;
 
-  const text = `
-New Sophrion Career Application
-
-Name: ${input.fullName}
-Email: ${input.email}
-Role: ${input.roleTitle ?? "Builder Network"}
-College: ${input.college ?? "-"}
-Degree: ${input.degree ?? "-"}
-Graduation Year: ${input.graduationYear ?? "-"}
-
-Admin dashboard:
-https://sophrion.in/admin/career-applications
-`;
+  const text = [
+    "New Sophrion Career Application",
+    "",
+    `Name: ${input.fullName}`,
+    `Email: ${input.email}`,
+    `Role: ${input.roleTitle ?? "Builder Network"}`,
+    `College: ${input.college ?? "-"}`,
+    `Degree: ${input.degree ?? "-"}`,
+    `Graduation Year: ${input.graduationYear ?? "-"}`,
+    `LinkedIn: ${input.linkedin ?? "-"}`,
+    "",
+    "Admin dashboard:",
+    "https://sophrion.in/admin/career-applications",
+  ].join("\n");
 
   return { subject, html, text };
 }
@@ -229,38 +232,47 @@ export async function POST(req: Request) {
     }
 
     try {
-      const mail = buildCareerAcknowledgementEmail({
+      const applicantMail = buildCareerAcknowledgementEmail({
         fullName: payload.full_name,
         roleTitle: roleTitleSnapshot,
       });
 
-      try {
-  const adminEmails =
-    process.env.CAREERS_ADMIN_EMAIL?.split(",").map((e) => e.trim()) ?? [];
-
-  if (adminEmails.length > 0) {
-    const adminMail = buildAdminNotificationEmail({
-      fullName: payload.full_name,
-      email: payload.email,
-      roleTitle: roleTitleSnapshot,
-      college: payload.college,
-      degree: payload.degree,
-      graduationYear: payload.graduation_year,
-      linkedin: payload.linkedin_url,
-    });
-
-    await sendEmail({
-      to: adminEmails,
-      subject: adminMail.subject,
-      html: adminMail.html,
-      text: adminMail.text,
-    });
-  }
-} catch (adminMailError) {
-  console.error("Admin notification email failed:", adminMailError);
-}
+      await sendEmail({
+        to: payload.email,
+        subject: applicantMail.subject,
+        html: applicantMail.html,
+        text: applicantMail.text,
+      });
     } catch (mailError) {
       console.error("Career acknowledgement email failed:", mailError);
+    }
+
+    try {
+      const adminEmails =
+        process.env.CAREERS_ADMIN_EMAIL?.split(",")
+          .map((email) => email.trim())
+          .filter(Boolean) ?? [];
+
+      if (adminEmails.length > 0) {
+        const adminMail = buildAdminNotificationEmail({
+          fullName: payload.full_name,
+          email: payload.email,
+          roleTitle: roleTitleSnapshot,
+          college: payload.college,
+          degree: payload.degree,
+          graduationYear: payload.graduation_year,
+          linkedin: payload.linkedin_url,
+        });
+
+        await sendEmail({
+          to: adminEmails,
+          subject: adminMail.subject,
+          html: adminMail.html,
+          text: adminMail.text,
+        });
+      }
+    } catch (adminMailError) {
+      console.error("Admin notification email failed:", adminMailError);
     }
 
     return json(

@@ -1,86 +1,62 @@
-// src/lib/email/send.ts
-import { getAppConfig, serverEnv } from "@/lib/env";
-
-export type SendEmailArgs = {
+type SendEmailArgs = {
   to: string | string[];
-  from?: string;
-  replyTo?: string;
   subject: string;
   html: string;
   text?: string;
-  headers?: Record<string, string>;
 };
 
-const appConfig = getAppConfig();
+export async function sendEmail({
+  to,
+  subject,
+  html,
+  text,
+}: SendEmailArgs) {
+  const apiKey = process.env.ZEPTOMAIL_API_KEY;
+  const fromEmail = process.env.ZEPTOMAIL_FROM_EMAIL;
+  const fromName = process.env.ZEPTOMAIL_FROM_NAME || "Sophrion";
 
-if (!serverEnv) {
-  throw new Error("serverEnv is unavailable in email sender");
-}
-
-const env = serverEnv;
-
-/**
- * Current behavior:
- * - In non-production: logs payload and skips sending
- * - In production:
- *   - if EMAIL_PROVIDER=zeptomail and config exists, sends via ZeptoMail
- *   - otherwise throws a clear error
- */
-export async function sendEmail(args: SendEmailArgs) {
-  const to = Array.isArray(args.to) ? args.to : [args.to];
-  const from = args.from ?? env.EMAIL_FROM_NOREPLY;
-
-  const payload = {
-    from,
-    to,
-    subject: args.subject,
-    html: args.html,
-    text: args.text,
-    replyTo: args.replyTo,
-    headers: args.headers,
-  };
-
-  if (env.NODE_ENV !== "production") {
-    // eslint-disable-next-line no-console
-    console.log("[email:send] DEV MODE - not sending. Payload:", payload);
-    return { ok: true as const, id: "dev_stub" as const };
+  if (!apiKey) {
+    throw new Error("Missing ZEPTOMAIL_API_KEY");
   }
 
-  if (env.EMAIL_PROVIDER !== "zeptomail") {
-    throw new Error(
-      `Unsupported EMAIL_PROVIDER="${env.EMAIL_PROVIDER}" for current sendEmail implementation.`
-    );
+  if (!fromEmail) {
+    throw new Error("Missing ZEPTOMAIL_FROM_EMAIL");
   }
 
-  if (!env.ZEPTOMAIL_HOST || !env.ZEPTOMAIL_API_KEY) {
-    throw new Error(
-      `Email sending is not configured for production. Missing ZEPTOMAIL_HOST or ZEPTOMAIL_API_KEY. Site=${appConfig.canonicalDomain}`
-    );
-  }
+  const recipients = Array.isArray(to) ? to : [to];
 
-  const res = await fetch(env.ZEPTOMAIL_HOST, {
+  const response = await fetch("https://api.zeptomail.in/v1.1/email", {
     method: "POST",
     headers: {
-      Authorization: `Zoho-enczapikey ${env.ZEPTOMAIL_API_KEY}`,
+      Accept: "application/json",
       "Content-Type": "application/json",
+      Authorization: `Zoho-enczapikey ${apiKey}`,
     },
     body: JSON.stringify({
-      from: { address: from },
-      to: to.map((email) => ({ email_address: { address: email } })),
-      subject: args.subject,
-      htmlbody: args.html,
-      textbody: args.text,
-      ...(args.replyTo ? { reply_to: [{ address: args.replyTo }] } : {}),
+      from: {
+        address: fromEmail,
+        name: fromName,
+      },
+      to: recipients.map((email) => ({
+        email_address: {
+          address: email,
+        },
+      })),
+      subject,
+      htmlbody: html,
+      textbody: text,
     }),
   });
 
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(
-      `Failed to send email via ZeptoMail (status ${res.status}). Site=${appConfig.canonicalDomain}. Body=${body}`
-    );
+  const raw = await response.text();
+
+  if (!response.ok) {
+    throw new Error(`ZeptoMail failed: ${response.status} ${raw}`);
   }
 
-  const json = (await res.json().catch(() => ({}))) as { data?: unknown };
-  return { ok: true as const, id: "zeptomail_sent" as const, data: json };
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return raw;
+  }
 }
