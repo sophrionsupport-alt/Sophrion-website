@@ -1,13 +1,21 @@
-// src/app/(admin)/admin/career-applications/page.tsx
 import Link from "next/link";
+import { createClient } from "@supabase/supabase-js";
 import {
   CAREER_APPLICATION_STATUSES,
   type CareerApplication,
 } from "@/types/careers";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+
+function supabaseAdmin() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+  return createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
 
 async function getApplications(): Promise<CareerApplication[]> {
-  const supabase = await createSupabaseServerClient();
+  const supabase = supabaseAdmin();
 
   const { data, error } = await supabase
     .from("career_applications")
@@ -27,6 +35,7 @@ async function getApplications(): Promise<CareerApplication[]> {
       resume_url,
       why_join,
       cover_letter,
+      recruiter_notes,
       status,
       source,
       created_at,
@@ -94,6 +103,7 @@ export default async function AdminCareerApplicationsPage({
   const filtered = applications.filter((app) => {
     const matchesStatus =
       selectedStatus === "all" || app.status === selectedStatus;
+
     const matchesRole =
       selectedRole === "all" || app.role_title_snapshot === selectedRole;
 
@@ -198,9 +208,11 @@ export default async function AdminCareerApplicationsPage({
                         {app.email}
                       </div>
                     </td>
+
                     <td className="px-5 py-4 text-white/75">
                       {app.role_title_snapshot || "Builder Network"}
                     </td>
+
                     <td className="px-5 py-4">
                       <span
                         className={`inline-flex rounded-full border px-3 py-1 text-xs ${statusClass(
@@ -210,9 +222,11 @@ export default async function AdminCareerApplicationsPage({
                         {app.status}
                       </span>
                     </td>
+
                     <td className="px-5 py-4 text-white/75">
                       {formatDate(app.created_at)}
                     </td>
+
                     <td className="px-5 py-4">
                       <Link
                         href={`/admin/career-applications/${app.id}`}

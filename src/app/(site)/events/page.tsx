@@ -1,10 +1,11 @@
 import Link from "next/link";
+import { CalendarDays, MapPin, Layers3, ArrowRight } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 function fmtDate(s?: string | null) {
-  if (!s) return "";
+  if (!s) return "Date to be announced";
   const d = new Date(s);
-  if (Number.isNaN(d.getTime())) return "";
+  if (Number.isNaN(d.getTime())) return "Date to be announced";
   return d.toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",
@@ -49,6 +50,21 @@ function buildModeVenue(mode?: string | null, venue?: string | null) {
   return "";
 }
 
+function getSummary(
+  overview?: string | null,
+  subtitle?: string | null
+) {
+  return overview || subtitle || "";
+}
+
+function Chip({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="rounded-full border border-white/10 bg-white/8 px-3 py-1 text-[11px] font-medium text-white/85 backdrop-blur">
+      {children}
+    </span>
+  );
+}
+
 export default async function EventsPage() {
   const supabase = await createSupabaseServerClient();
 
@@ -61,6 +77,7 @@ export default async function EventsPage() {
       title,
       subtitle,
       overview,
+      description,
       start_at,
       city,
       state,
@@ -77,118 +94,151 @@ export default async function EventsPage() {
 
   if (error) {
     return (
-      <div className="mx-auto max-w-6xl px-4 py-12 text-foreground">
-        <h1 className="text-2xl font-semibold">Events</h1>
-        <p className="mt-2 text-sm text-foreground/60">
-          Failed to load events. Check Supabase connection and RLS policies.
-        </p>
-        <pre className="mt-4 overflow-auto rounded-2xl border border-border bg-background/40 p-4 text-xs text-foreground/70">
-          {error.message}
-        </pre>
+      <div className="mx-auto max-w-7xl px-4 py-12 text-foreground sm:px-6 lg:px-8">
+        <div className="rounded-3xl border border-white/10 bg-background/40 p-6 sm:p-8">
+          <h1 className="text-2xl font-semibold">Events</h1>
+          <p className="mt-2 text-sm text-foreground/60">
+            Failed to load events. Check Supabase connection and RLS policies.
+          </p>
+          <pre className="mt-4 overflow-auto rounded-2xl border border-white/10 bg-black/20 p-4 text-xs text-foreground/70">
+            {error.message}
+          </pre>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12 text-foreground">
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold">Events</h1>
-        <p className="mt-2 text-sm text-foreground/60">
-          Browse upcoming workshops, hackathons, and innovation experiences.
-        </p>
-      </div>
+    <div className="mx-auto max-w-7xl px-4 py-12 text-foreground sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden rounded-4xl border border-white/10 bg-background/40 px-6 py-10 sm:px-8 sm:py-14 lg:px-12">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-80"
+          style={{
+            background:
+              "radial-gradient(700px circle at 0% 0%, rgba(124,58,237,0.16), transparent 45%), radial-gradient(700px circle at 100% 0%, rgba(6,182,212,0.14), transparent 40%)",
+          }}
+        />
+        <div className="relative max-w-3xl">
+          <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-foreground/60">
+            Events
+          </div>
 
-      {!events?.length ? (
-        <div className="rounded-2xl border border-border bg-background/40 p-6 text-sm text-foreground/70">
-          No events published yet.
+          <h1 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
+            Workshops, hackathons, and high-impact student experiences
+          </h1>
+
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-foreground/68 sm:text-base">
+            Explore upcoming Sophrion events designed for learning, collaboration,
+            innovation, and practical problem-solving.
+          </p>
         </div>
-      ) : (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {events.map((e) => {
-            const location = buildLocation(e.city, e.state);
-            const modeVenue = buildModeVenue(e.mode, e.venue);
+      </section>
 
-            return (
-              <Link
-                key={e.id}
-                href={`/events/${e.slug}`}
-                className="group overflow-hidden rounded-2xl border border-white/10 bg-card transition hover:border-white/20 hover:bg-card/80"
-              >
-                <div className="relative aspect-video overflow-hidden border-b border-white/10 bg-background/40">
-                  {e.banner_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={e.banner_url}
-                      alt={e.title}
-                      className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_top,rgba(120,119,198,0.22),transparent_55%)] text-sm text-foreground/40">
-                      No banner
-                    </div>
-                  )}
+      <section className="mt-8">
+        {!events?.length ? (
+          <div className="rounded-3xl border border-white/10 bg-background/40 p-6 text-sm text-foreground/70 sm:p-8">
+            No events published yet.
+          </div>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {events.map((e) => {
+              const location = buildLocation(e.city, e.state);
+              const modeVenue = buildModeVenue(e.mode, e.venue);
+              const summary = getSummary(e.overview, e.description || e.subtitle);
 
-                  <div className="absolute left-3 top-3 flex flex-wrap gap-2">
-                    <span className="rounded-full border border-white/10 bg-black/40 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur">
-                      {labelEventType(e.event_type)}
-                    </span>
-                    <span className="rounded-full border border-white/10 bg-black/40 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur">
-                      {labelRegistrationType(e.registration_type)}
-                    </span>
-                  </div>
+              return (
+                <Link
+                  key={e.id}
+                  href={`/events/${e.slug}`}
+                  className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-white/10 bg-card/90 transition duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-card"
+                >
+                  <div className="relative aspect-16/10 overflow-hidden border-b border-white/10 bg-background/40">
+                    {e.banner_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={e.banner_url}
+                        alt={e.title}
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_top,rgba(120,119,198,0.22),transparent_55%)] text-sm text-foreground/40">
+                        No banner
+                      </div>
+                    )}
 
-                  <div className="absolute right-3 top-3">
-                    <span
-                      className={[
-                        "rounded-full px-2.5 py-1 text-[11px] font-medium backdrop-blur",
-                        e.registration_open
-                          ? "border border-emerald-400/20 bg-emerald-500/15 text-emerald-200"
-                          : "border border-rose-400/20 bg-rose-500/15 text-rose-200",
-                      ].join(" ")}
-                    >
-                      {e.registration_open ? "Registration Open" : "Closed"}
-                    </span>
-                  </div>
-                </div>
+                    <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/15 to-transparent" />
 
-                <div className="p-5">
-                  <div className="text-base font-semibold">{e.title}</div>
-
-                  {e.subtitle ? (
-                    <div className="mt-1 text-sm text-foreground/70">
-                      {e.subtitle}
-                    </div>
-                  ) : null}
-
-                  {e.overview ? (
-                    <p className="mt-3 line-clamp-3 text-sm text-foreground/65">
-                      {e.overview}
-                    </p>
-                  ) : null}
-
-                  <div className="mt-4 space-y-1">
-                    <div className="text-xs text-foreground/60">
-                      {fmtDate(e.start_at) || "Date to be announced"}
+                    <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+                      <Chip>{labelEventType(e.event_type)}</Chip>
+                      <Chip>{labelRegistrationType(e.registration_type)}</Chip>
                     </div>
 
-                    {location ? (
-                      <div className="text-xs text-foreground/55">{location}</div>
-                    ) : null}
-
-                    {modeVenue ? (
-                      <div className="text-xs text-foreground/50">{modeVenue}</div>
-                    ) : null}
+                    <div className="absolute right-3 top-3">
+                      <span
+                        className={[
+                          "rounded-full px-3 py-1 text-[11px] font-medium backdrop-blur",
+                          e.registration_open
+                            ? "border border-emerald-400/20 bg-emerald-500/15 text-emerald-200"
+                            : "border border-rose-400/20 bg-rose-500/15 text-rose-200",
+                        ].join(" ")}
+                      >
+                        {e.registration_open ? "Registration Open" : "Closed"}
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="mt-4 text-sm font-medium text-[hsl(var(--cyan-500))]">
-                    View event →
+                  <div className="flex flex-1 flex-col p-5 sm:p-6">
+                    <div>
+                      <h2 className="text-lg font-semibold leading-tight text-foreground sm:text-xl">
+                        {e.title}
+                      </h2>
+
+                      {e.subtitle ? (
+                        <p className="mt-2 text-sm leading-6 text-foreground/70">
+                          {e.subtitle}
+                        </p>
+                      ) : null}
+
+                      {summary ? (
+                        <p className="mt-3 line-clamp-3 text-sm leading-7 text-foreground/62">
+                          {summary}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    <div className="mt-5 space-y-3 border-t border-white/10 pt-4 text-sm text-foreground/68">
+                      <div className="flex items-start gap-2.5">
+                        <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-foreground/45" />
+                        <span>{fmtDate(e.start_at)}</span>
+                      </div>
+
+                      {location ? (
+                        <div className="flex items-start gap-2.5">
+                          <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-foreground/45" />
+                          <span>{location}</span>
+                        </div>
+                      ) : null}
+
+                      {modeVenue ? (
+                        <div className="flex items-start gap-2.5">
+                          <Layers3 className="mt-0.5 h-4 w-4 shrink-0 text-foreground/45" />
+                          <span>{modeVenue}</span>
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <div className="mt-5 flex items-center gap-2 text-sm font-medium text-[hsl(var(--cyan-500))]">
+                      <span>View event</span>
+                      <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                    </div>
                   </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      )}
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

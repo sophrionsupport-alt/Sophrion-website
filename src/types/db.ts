@@ -1,4 +1,5 @@
 // src/types/db.ts
+
 export type Json =
   | string
   | number
@@ -14,22 +15,6 @@ export type EventMode = "online" | "offline" | "hybrid";
 export type Database = {
   public: {
     Tables: {
-      profiles: {
-        Row: {
-          id: string;
-          role: string | null;
-        };
-        Insert: {
-          id: string;
-          role?: string | null;
-        };
-        Update: {
-          id?: string;
-          role?: string | null;
-        };
-        Relationships: [];
-      };
-
       events: {
         Row: {
           id: string;
@@ -62,12 +47,21 @@ export type Database = {
           state: string | null;
           banner_url: string | null;
 
+          fee: string | null;
+          prize_pool: string | null;
+          winner_prize: string | null;
+          runner_prize: string | null;
+
+          benefits_json: Json | null;
+          sample_roles_json: Json | null;
+
           is_published: boolean;
           registration_open: boolean;
 
           created_at: string;
           updated_at: string;
         };
+
         Insert: {
           id?: string;
           slug: string;
@@ -99,12 +93,21 @@ export type Database = {
           state?: string | null;
           banner_url?: string | null;
 
+          fee?: string | null;
+          prize_pool?: string | null;
+          winner_prize?: string | null;
+          runner_prize?: string | null;
+
+          benefits_json?: Json | null;
+          sample_roles_json?: Json | null;
+
           is_published?: boolean;
           registration_open?: boolean;
 
           created_at?: string;
           updated_at?: string;
         };
+
         Update: {
           id?: string;
           slug?: string;
@@ -136,153 +139,21 @@ export type Database = {
           state?: string | null;
           banner_url?: string | null;
 
+          fee?: string | null;
+          prize_pool?: string | null;
+          winner_prize?: string | null;
+          runner_prize?: string | null;
+
+          benefits_json?: Json | null;
+          sample_roles_json?: Json | null;
+
           is_published?: boolean;
           registration_open?: boolean;
 
           created_at?: string;
           updated_at?: string;
         };
-        Relationships: [];
-      };
 
-      teams: {
-        Row: {
-          id: string;
-          event_id: string;
-          team_name: string;
-          leader_name: string;
-          leader_email: string;
-          leader_phone: string | null;
-          college: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          event_id: string;
-          team_name: string;
-          leader_name: string;
-          leader_email: string;
-          leader_phone?: string | null;
-          college?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          event_id?: string;
-          team_name?: string;
-          leader_name?: string;
-          leader_email?: string;
-          leader_phone?: string | null;
-          college?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "teams_event_id_fkey";
-            columns: ["event_id"];
-            referencedRelation: "events";
-            referencedColumns: ["id"];
-          }
-        ];
-      };
-
-      team_members: {
-        Row: {
-          id: string;
-          team_id: string;
-          member_name: string;
-          member_email: string | null;
-          member_phone: string | null;
-          college: string | null;
-          gender: string | null;
-          role: string | null;
-          is_leader: boolean;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          team_id: string;
-          member_name: string;
-          member_email?: string | null;
-          member_phone?: string | null;
-          college?: string | null;
-          gender?: string | null;
-          role?: string | null;
-          is_leader?: boolean;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          team_id?: string;
-          member_name?: string;
-          member_email?: string | null;
-          member_phone?: string | null;
-          college?: string | null;
-          gender?: string | null;
-          role?: string | null;
-          is_leader?: boolean;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "team_members_team_id_fkey";
-            columns: ["team_id"];
-            referencedRelation: "teams";
-            referencedColumns: ["id"];
-          }
-        ];
-      };
-
-      colleges: {
-        Row: {
-          id: string;
-          name: string;
-          city: string | null;
-          state: string | null;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          name: string;
-          city?: string | null;
-          state?: string | null;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          name?: string;
-          city?: string | null;
-          state?: string | null;
-          created_at?: string;
-        };
-        Relationships: [];
-      };
-
-      newsletter: {
-        Row: {
-          id: string;
-          email: string;
-          source: string | null;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          email: string;
-          source?: string | null;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          email?: string;
-          source?: string | null;
-          created_at?: string;
-        };
         Relationships: [];
       };
     };

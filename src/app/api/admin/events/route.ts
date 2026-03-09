@@ -16,7 +16,10 @@ function fail(error: string, status = 400): Response {
 }
 
 function escapeIlike(value: string) {
-  return value.replaceAll("\\", "\\\\").replaceAll("%", "\\%").replaceAll("_", "\\_");
+  return value
+    .replaceAll("\\", "\\\\")
+    .replaceAll("%", "\\%")
+    .replaceAll("_", "\\_");
 }
 
 export async function GET(req: Request) {
@@ -50,7 +53,33 @@ export async function GET(req: Request) {
   let query = supabase
     .from("events")
     .select(
-      "id,slug,title,subtitle,start_at,end_at,mode,venue,city,state,banner_url,is_published,registration_open,created_at,updated_at",
+      `
+      id,
+      slug,
+      title,
+      subtitle,
+      start_at,
+      end_at,
+      mode,
+      venue,
+      city,
+      state,
+      banner_url,
+
+      event_type,
+      registration_type,
+
+      fee,
+      prize_pool,
+      winner_prize,
+      runner_prize,
+
+      is_published,
+      registration_open,
+
+      created_at,
+      updated_at
+      `,
       { count: "exact" }
     )
     .order("start_at", { ascending, nullsFirst: false })

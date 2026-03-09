@@ -1,114 +1,270 @@
-// src/app/(admin)/admin/career-applications/[id]/page.tsx
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import type { CareerApplication } from "@/types/careers";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createClient } from "@supabase/supabase-js";
 import StatusUpdater from "./status-updater";
+import DeleteApplicationButton from "./delete-application-button";
+import { type CareerApplication } from "@/types/careers";
+function supabaseAdmin() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-type PageProps = {
-  params: Promise<{ id: string }>;
-};
+  return createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
 
-async function getApplication(id: string): Promise<CareerApplication | null> {
-  const supabase = await createSupabaseServerClient();
+async function getApplication(id: string) {
+  const supabase = supabaseAdmin();
 
   const { data, error } = await supabase
     .from("career_applications")
-    .select("*")
+    .select(
+      `
+      id,
+      role_id,
+      role_title_snapshot,
+      full_name,
+      email,
+      phone,
+      college,
+      degree,
+      graduation_year,
+      linkedin_url,
+      portfolio_url,
+      resume_url,
+      why_join,
+      cover_letter,
+      recruiter_notes,
+      status,
+      source,
+      created_at,
+      updated_at
+      `
+    )
     .eq("id", id)
     .maybeSingle();
 
   if (error) {
-    console.error("Failed to fetch career application:", error);
+    console.error("Failed to fetch application:", error);
     return null;
   }
 
-  return (data as CareerApplication | null) ?? null;
+  return data;
 }
 
-function fmtDate(date?: string | null) {
+function formatDate(date?: string | null) {
   if (!date) return "—";
   const d = new Date(date);
   if (Number.isNaN(d.getTime())) return "—";
   return d.toLocaleString();
 }
 
-function InfoCard({
-  label,
-  value,
-}: {
-  label: string;
-  value?: string | null;
-}) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-      <div className="text-xs uppercase tracking-[0.18em] text-white/40">
-        {label}
-      </div>
-      <div className="mt-2 wrap-break-word text-sm leading-6 text-white/85">
-        {value?.trim() ? value : "—"}
-      </div>
-    </div>
-  );
-}
-
 export default async function AdminCareerApplicationDetailPage({
   params,
-}: PageProps) {
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const application = await getApplication(id);
 
-  if (!application) notFound();
+  if (!application) {
+    notFound();
+  }
 
   return (
     <main className="space-y-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <Link
-            href="/admin/career-applications"
-            className="inline-flex items-center text-sm text-white/65 transition hover:text-white"
-          >
-            ← Back to applications
-          </Link>
-          <h1 className="mt-4 text-3xl font-semibold text-white">
+          <p className="text-xs uppercase tracking-[0.22em] text-white/40">
+            Candidate profile
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold text-white">
             {application.full_name}
           </h1>
           <p className="mt-2 text-sm text-white/60">
-            {application.role_title_snapshot || "Builder Network"} • Submitted{" "}
-            {fmtDate(application.created_at)}
+            Review candidate details and move them through the hiring pipeline.
           </p>
         </div>
+
+        <div className="flex flex-wrap gap-3">
+        <Link
+          href="/admin/career-applications"
+          className="inline-flex rounded-xl border border-white/12 bg-white/5 px-4 py-2.5 text-sm font-medium text-white/85"
+        >
+          Back to applications
+        </Link>
+
+        <DeleteApplicationButton id={application.id} />
+      </div>
       </div>
 
-      <StatusUpdater id={application.id} currentStatus={application.status} />
+      <div className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
+        <section className="space-y-6 rounded-3xl border border-white/10 bg-white/3 p-6">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <p className="text-xs uppercase tracking-wide text-white/40">
+                Email
+              </p>
+              <p className="mt-1 text-sm text-white">{application.email || "—"}</p>
+            </div>
 
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-        <InfoCard label="Email" value={application.email} />
-        <InfoCard label="Phone" value={application.phone} />
-        <InfoCard label="College" value={application.college} />
-        <InfoCard label="Degree" value={application.degree} />
-        <InfoCard label="Graduation Year" value={application.graduation_year} />
-        <InfoCard label="Source" value={application.source} />
-        <InfoCard label="LinkedIn" value={application.linkedin_url} />
-        <InfoCard label="Portfolio" value={application.portfolio_url} />
-        <InfoCard label="Resume URL" value={application.resume_url} />
+            <div>
+              <p className="text-xs uppercase tracking-wide text-white/40">
+                Phone
+              </p>
+              <p className="mt-1 text-sm text-white">{application.phone || "—"}</p>
+            </div>
+
+            <div>
+              <p className="text-xs uppercase tracking-wide text-white/40">
+                Role
+              </p>
+              <p className="mt-1 text-sm text-white">
+                {application.role_title_snapshot || "Builder Network"}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-xs uppercase tracking-wide text-white/40">
+                Submitted
+              </p>
+              <p className="mt-1 text-sm text-white">
+                {formatDate(application.created_at)}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-xs uppercase tracking-wide text-white/40">
+                College
+              </p>
+              <p className="mt-1 text-sm text-white">
+                {application.college || "—"}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-xs uppercase tracking-wide text-white/40">
+                Degree
+              </p>
+              <p className="mt-1 text-sm text-white">
+                {application.degree || "—"}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-xs uppercase tracking-wide text-white/40">
+                Graduation year
+              </p>
+              <p className="mt-1 text-sm text-white">
+                {application.graduation_year || "—"}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-xs uppercase tracking-wide text-white/40">
+                Source
+              </p>
+              <p className="mt-1 text-sm text-white">
+                {application.source || "—"}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <p className="text-xs uppercase tracking-wide text-white/40">
+                LinkedIn
+              </p>
+              {application.linkedin_url ? (
+                <a
+                  href={application.linkedin_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-1 inline-block text-sm text-cyan-300 underline underline-offset-4"
+                >
+                  Open LinkedIn
+                </a>
+              ) : (
+                <p className="mt-1 text-sm text-white">—</p>
+              )}
+            </div>
+
+            <div>
+              <p className="text-xs uppercase tracking-wide text-white/40">
+                Portfolio
+              </p>
+              {application.portfolio_url ? (
+                <a
+                  href={application.portfolio_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-1 inline-block text-sm text-cyan-300 underline underline-offset-4"
+                >
+                  Open portfolio
+                </a>
+              ) : (
+                <p className="mt-1 text-sm text-white">—</p>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <p className="text-xs uppercase tracking-wide text-white/40">
+              Why join
+            </p>
+            <div className="mt-2 rounded-2xl border border-white/10 bg-black/20 p-4 text-sm leading-7 text-white/85">
+              {application.why_join || "—"}
+            </div>
+          </div>
+
+          <div>
+            <p className="text-xs uppercase tracking-wide text-white/40">
+              Cover letter
+            </p>
+            <div className="mt-2 rounded-2xl border border-white/10 bg-black/20 p-4 text-sm leading-7 text-white/85">
+              {application.cover_letter || "—"}
+            </div>
+          </div>
+        </section>
+
+        <aside className="space-y-6">
+          <section className="rounded-3xl border border-white/10 bg-white/3 p-6">
+            <h2 className="text-lg font-semibold text-white">Hiring status</h2>
+            <p className="mt-2 text-sm text-white/60">
+              Move the candidate across your review pipeline.
+            </p>
+
+            <div className="mt-5">
+              <StatusUpdater
+                id={application.id}
+                status={application.status}
+              />
+            </div>
+          </section>
+
+          <section className="rounded-3xl border border-white/10 bg-white/3 p-6">
+            <h2 className="text-lg font-semibold text-white">Resume</h2>
+            <p className="mt-2 text-sm text-white/60">
+              Open the uploaded candidate document.
+            </p>
+
+            <div className="mt-5">
+              {application.resume_url ? (
+                <a
+                  href={application.resume_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex rounded-xl bg-linear-to-r from-violet-500 to-cyan-500 px-4 py-2.5 text-sm font-medium text-white"
+                >
+                  Open resume
+                </a>
+              ) : (
+                <p className="text-sm text-white/60">No resume uploaded.</p>
+              )}
+            </div>
+          </section>
+        </aside>
       </div>
-
-      <section className="rounded-3xl border border-white/10 bg-white/3 p-6 md:p-8">
-        <h2 className="text-2xl font-semibold text-white">Why Sophrion</h2>
-        <div className="mt-5 whitespace-pre-line text-sm leading-7 text-white/75">
-          {application.why_join?.trim() || "—"}
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-white/10 bg-white/3 p-6 md:p-8">
-        <h2 className="text-2xl font-semibold text-white">
-          Additional information
-        </h2>
-        <div className="mt-5 whitespace-pre-line text-sm leading-7 text-white/75">
-          {application.cover_letter?.trim() || "—"}
-        </div>
-      </section>
     </main>
   );
 }

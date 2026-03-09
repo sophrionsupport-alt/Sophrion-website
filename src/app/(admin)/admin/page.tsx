@@ -18,7 +18,9 @@ type StatKey =
   | "registrations"
   | "contacts"
   | "newsletter"
-  | "blog";
+  | "blog"
+  | "careers"
+  | "careerApplications";
 
 type StatsState = Record<StatKey, { value: number | null; loading: boolean }>;
 
@@ -71,6 +73,18 @@ const statItems = [
     href: "/admin/blog",
     icon: Newspaper,
   },
+  {
+    key: "careers" as const,
+    title: "Careers",
+    href: "/admin/careers",
+    icon: Users,
+  },
+  {
+    key: "careerApplications" as const,
+    title: "Applications",
+    href: "/admin/career-applications",
+    icon: Users,
+  },
 ];
 
 const sectionLinks = [
@@ -98,6 +112,16 @@ const sectionLinks = [
     title: "Blog",
     description: "Handle drafts and published posts.",
     href: "/admin/blog",
+  },
+  {
+    title: "Careers",
+    description: "Create and manage job roles.",
+    href: "/admin/careers",
+  },
+  {
+    title: "Career applications",
+    description: "Review candidates and manage hiring pipeline.",
+    href: "/admin/career-applications",
   },
   {
     title: "College requests",
@@ -180,46 +204,60 @@ function SectionLink({
 
 export default function AdminHomePage() {
   const [stats, setStats] = React.useState<StatsState>({
-    events: { value: null, loading: true },
-    registrations: { value: null, loading: true },
-    contacts: { value: null, loading: true },
-    newsletter: { value: null, loading: true },
-    blog: { value: null, loading: true },
-  });
+  events: { value: null, loading: true },
+  registrations: { value: null, loading: true },
+  contacts: { value: null, loading: true },
+  newsletter: { value: null, loading: true },
+  blog: { value: null, loading: true },
+  careers: { value: null, loading: true },
+  careerApplications: { value: null, loading: true },
+});
 
   const [refreshing, setRefreshing] = React.useState(false);
 
-  const loadStats = React.useCallback(async () => {
-    setRefreshing(true);
+const loadStats = React.useCallback(async () => {
+  setRefreshing(true);
 
-    setStats((s) => ({
-      events: { ...s.events, loading: true },
-      registrations: { ...s.registrations, loading: true },
-      contacts: { ...s.contacts, loading: true },
-      newsletter: { ...s.newsletter, loading: true },
-      blog: { ...s.blog, loading: true },
-    }));
+  setStats((s) => ({
+    events: { ...s.events, loading: true },
+    registrations: { ...s.registrations, loading: true },
+    contacts: { ...s.contacts, loading: true },
+    newsletter: { ...s.newsletter, loading: true },
+    blog: { ...s.blog, loading: true },
+    careers: { ...s.careers, loading: true },
+    careerApplications: { ...s.careerApplications, loading: true },
+  }));
 
-    const [events, registrations, contacts, newsletter, blog] =
-      await Promise.all([
-        safeCount("/api/admin/events"),
-        safeCount("/api/admin/registrations"),
-        safeCount("/api/admin/contacts"),
-        safeCount("/api/admin/newsletter"),
-        safeCount("/api/admin/blog"),
-      ]);
+  const [
+    events,
+    registrations,
+    contacts,
+    newsletter,
+    blog,
+    careers,
+    careerApplications,
+  ] = await Promise.all([
+    safeCount("/api/admin/events"),
+    safeCount("/api/admin/registrations"),
+    safeCount("/api/admin/contacts"),
+    safeCount("/api/admin/newsletter"),
+    safeCount("/api/admin/blog"),
+    safeCount("/api/admin/careers"),
+    safeCount("/api/admin/career-applications"),
+  ]);
 
-    setStats({
-      events: { value: events, loading: false },
-      registrations: { value: registrations, loading: false },
-      contacts: { value: contacts, loading: false },
-      newsletter: { value: newsletter, loading: false },
-      blog: { value: blog, loading: false },
-    });
+  setStats({
+    events: { value: events, loading: false },
+    registrations: { value: registrations, loading: false },
+    contacts: { value: contacts, loading: false },
+    newsletter: { value: newsletter, loading: false },
+    blog: { value: blog, loading: false },
+    careers: { value: careers, loading: false },
+    careerApplications: { value: careerApplications, loading: false },
+  });
 
-    setRefreshing(false);
-  }, []);
-
+  setRefreshing(false);
+}, []);
   React.useEffect(() => {
     loadStats();
   }, [loadStats]);

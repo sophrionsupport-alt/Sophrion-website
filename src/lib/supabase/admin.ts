@@ -1,28 +1,17 @@
 import { createClient } from "@supabase/supabase-js";
-import { publicEnv, serverEnv } from "@/lib/env";
-
-function assertServerOnly() {
-  if (typeof window !== "undefined") {
-    throw new Error("❌ supabaseAdminClient imported in browser/client code.");
-  }
-}
 
 export function createSupabaseAdminClient() {
-  assertServerOnly();
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-  if (!serverEnv) {
-    throw new Error("SUPABASE_SERVICE_ROLE_KEY missing from server environment.");
+  if (!serviceKey) {
+    throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY");
   }
 
-  return createClient(
-    publicEnv.NEXT_PUBLIC_SUPABASE_URL,
-    serverEnv.SUPABASE_SERVICE_ROLE_KEY,
-    {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-        detectSessionInUrl: false,
-      },
-    }
-  );
+  return createClient(url, serviceKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
 }

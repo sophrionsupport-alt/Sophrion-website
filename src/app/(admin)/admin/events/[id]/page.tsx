@@ -6,6 +6,22 @@ import { useParams, useRouter } from "next/navigation";
 type EventType = "workshop" | "hackathon" | "hybrid";
 type RegistrationType = "individual" | "team";
 
+type ScheduleItem = {
+  day: string;
+  time: string;
+  title: string;
+};
+
+type ProblemStatementItem = {
+  title: string;
+  summary: string;
+};
+
+type JudgingItem = {
+  criterion: string;
+  weight: string;
+};
+
 type EventRecord = {
   id: string;
   slug: string;
@@ -40,6 +56,13 @@ type EventRecord = {
   schedule_json: unknown | null;
   problem_statements_json: unknown | null;
   judging_json: unknown | null;
+
+  fee?: string | null;
+  prize_pool?: string | null;
+  winner_prize?: string | null;
+  runner_prize?: string | null;
+  benefits_json?: unknown | null;
+  sample_roles_json?: unknown | null;
 
   created_at?: string | null;
   updated_at?: string | null;
@@ -76,9 +99,11 @@ type FormState = {
   role_based_team: boolean;
 
   rules_markdown: string;
-  schedule_json: string;
-  problem_statements_json: string;
-  judging_json: string;
+
+  fee: string;
+  prize_pool: string;
+  winner_prize: string;
+  runner_prize: string;
 };
 
 function toInputDateTime(value: string | null) {
@@ -102,15 +127,6 @@ function toISOStringOrNull(localValue: string) {
   return d.toISOString();
 }
 
-function stringifyJson(value: unknown) {
-  if (value == null) return "";
-  try {
-    return JSON.stringify(value, null, 2);
-  } catch {
-    return "";
-  }
-}
-
 function inputClassName() {
   return "w-full rounded-xl border border-border bg-background/40 px-3 py-2 text-sm text-foreground outline-none";
 }
@@ -123,6 +139,93 @@ function sectionClassName() {
   return "rounded-2xl border border-border bg-card p-5";
 }
 
+function rowCardClassName() {
+  return "rounded-xl border border-white/10 bg-white/5 p-4";
+}
+
+function toScheduleItems(value: unknown): ScheduleItem[] {
+  if (!Array.isArray(value) || value.length === 0) {
+    return [{ day: "", time: "", title: "" }];
+  }
+
+  return value.map((item) => {
+    const record =
+      item && typeof item === "object" ? (item as Record<string, unknown>) : {};
+    return {
+      day: String(record.day ?? ""),
+      time: String(record.time ?? ""),
+      title: String(record.title ?? ""),
+    };
+  });
+}
+
+function toProblemItems(value: unknown): ProblemStatementItem[] {
+  if (!Array.isArray(value) || value.length === 0) {
+    return [{ title: "", summary: "" }];
+  }
+
+  return value.map((item) => {
+    const record =
+      item && typeof item === "object" ? (item as Record<string, unknown>) : {};
+    return {
+      title: String(record.title ?? ""),
+      summary: String(record.summary ?? ""),
+    };
+  });
+}
+
+function toJudgingItems(value: unknown): JudgingItem[] {
+  if (!Array.isArray(value) || value.length === 0) {
+    return [{ criterion: "", weight: "" }];
+  }
+
+  return value.map((item) => {
+    const record =
+      item && typeof item === "object" ? (item as Record<string, unknown>) : {};
+    return {
+      criterion: String(record.criterion ?? ""),
+      weight: String(record.weight ?? ""),
+    };
+  });
+}
+
+function toStringList(value: unknown): string[] {
+  if (!Array.isArray(value) || value.length === 0) return [""];
+  return value.map((item) => String(item ?? ""));
+}
+
+function removeEmptyScheduleRows(items: ScheduleItem[]) {
+  return items
+    .map((item) => ({
+      day: item.day.trim(),
+      time: item.time.trim(),
+      title: item.title.trim(),
+    }))
+    .filter((item) => item.day || item.time || item.title);
+}
+
+function removeEmptyProblemRows(items: ProblemStatementItem[]) {
+  return items
+    .map((item) => ({
+      title: item.title.trim(),
+      summary: item.summary.trim(),
+    }))
+    .filter((item) => item.title || item.summary);
+}
+
+function removeEmptyJudgingRows(items: JudgingItem[]) {
+  return items
+    .map((item) => ({
+      criterion: item.criterion.trim(),
+      weight: item.weight.trim(),
+    }))
+    .filter((item) => item.criterion || item.weight);
+}
+
+function removeEmptyStringRows(items: string[]) {
+  return items.map((item) => item.trim()).filter(Boolean);
+}
+
 export default function AdminEventEditPage() {
   const params = useParams<{ id: string }>();
   const id = params?.id;
@@ -130,6 +233,8 @@ export default function AdminEventEditPage() {
 
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
+  const [deletingRegistrations, setDeletingRegistrations] = React.useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = React.useState("");
 
   const [event, setEvent] = React.useState<EventRecord | null>(null);
 
@@ -164,10 +269,24 @@ export default function AdminEventEditPage() {
     role_based_team: false,
 
     rules_markdown: "",
-    schedule_json: "",
-    problem_statements_json: "",
-    judging_json: "",
+
+    fee: "",
+    prize_pool: "",
+    winner_prize: "",
+    runner_prize: "",
   });
+
+  const [schedule, setSchedule] = React.useState<ScheduleItem[]>([
+    { day: "", time: "", title: "" },
+  ]);
+  const [problemStatements, setProblemStatements] = React.useState<
+    ProblemStatementItem[]
+  >([{ title: "", summary: "" }]);
+  const [judgingCriteria, setJudgingCriteria] = React.useState<JudgingItem[]>([
+    { criterion: "", weight: "" },
+  ]);
+  const [benefits, setBenefits] = React.useState<string[]>([""]);
+  const [sampleRoles, setSampleRoles] = React.useState<string[]>([""]);
 
   function patchForm(p: Partial<FormState>) {
     setForm((f) => ({ ...f, ...p }));
@@ -178,17 +297,6 @@ export default function AdminEventEditPage() {
     form.event_type === "hackathon" || form.event_type === "hybrid";
   const isWorkshopLike =
     form.event_type === "workshop" || form.event_type === "hybrid";
-
-  function validateJsonField(value: string, label: string) {
-    if (!value.trim()) return null;
-
-    try {
-      JSON.parse(value);
-      return null;
-    } catch {
-      return `${label} must be valid JSON.`;
-    }
-  }
 
   function validateForm() {
     if (!form.title.trim()) {
@@ -235,18 +343,6 @@ export default function AdminEventEditPage() {
         }
       }
     }
-
-    const scheduleJsonError = validateJsonField(form.schedule_json, "Schedule JSON");
-    if (scheduleJsonError) return scheduleJsonError;
-
-    const problemStatementsJsonError = validateJsonField(
-      form.problem_statements_json,
-      "Problem statements JSON"
-    );
-    if (problemStatementsJsonError) return problemStatementsJsonError;
-
-    const judgingJsonError = validateJsonField(form.judging_json, "Judging JSON");
-    if (judgingJsonError) return judgingJsonError;
 
     return null;
   }
@@ -303,10 +399,18 @@ export default function AdminEventEditPage() {
         role_based_team: Boolean(e.role_based_team),
 
         rules_markdown: e.rules_markdown ?? "",
-        schedule_json: stringifyJson(e.schedule_json),
-        problem_statements_json: stringifyJson(e.problem_statements_json),
-        judging_json: stringifyJson(e.judging_json),
+
+        fee: e.fee ?? "",
+        prize_pool: e.prize_pool ?? "",
+        winner_prize: e.winner_prize ?? "",
+        runner_prize: e.runner_prize ?? "",
       });
+
+      setSchedule(toScheduleItems(e.schedule_json));
+      setProblemStatements(toProblemItems(e.problem_statements_json));
+      setJudgingCriteria(toJudgingItems(e.judging_json));
+      setBenefits(toStringList(e.benefits_json));
+      setSampleRoles(toStringList(e.sample_roles_json));
     } catch (err) {
       console.error(err);
       alert("Network error");
@@ -326,6 +430,12 @@ export default function AdminEventEditPage() {
 
     try {
       setSaving(true);
+
+      const cleanSchedule = removeEmptyScheduleRows(schedule);
+      const cleanProblems = removeEmptyProblemRows(problemStatements);
+      const cleanJudging = removeEmptyJudgingRows(judgingCriteria);
+      const cleanBenefits = removeEmptyStringRows(benefits);
+      const cleanRoles = removeEmptyStringRows(sampleRoles);
 
       const payload = {
         title: form.title.trim(),
@@ -361,9 +471,19 @@ export default function AdminEventEditPage() {
         role_based_team: isTeamEvent ? form.role_based_team : false,
 
         rules_markdown: form.rules_markdown.trim() || null,
-        schedule_json: form.schedule_json.trim() || null,
-        problem_statements_json: form.problem_statements_json.trim() || null,
-        judging_json: form.judging_json.trim() || null,
+
+        schedule_json: cleanSchedule.length ? cleanSchedule : null,
+        problem_statements_json: cleanProblems.length ? cleanProblems : null,
+        judging_json: cleanJudging.length ? cleanJudging : null,
+
+        fee: form.fee.trim() || null,
+        prize_pool: form.prize_pool.trim() || null,
+        winner_prize: form.winner_prize.trim() || null,
+        runner_prize: form.runner_prize.trim() || null,
+
+        benefits_json: cleanBenefits.length ? cleanBenefits : null,
+        sample_roles_json:
+          isTeamEvent && cleanRoles.length ? cleanRoles : null,
       };
 
       const res = await fetch(`/api/admin/events/${encodeURIComponent(id)}`, {
@@ -418,10 +538,18 @@ export default function AdminEventEditPage() {
         role_based_team: Boolean(next.role_based_team),
 
         rules_markdown: next.rules_markdown ?? "",
-        schedule_json: stringifyJson(next.schedule_json),
-        problem_statements_json: stringifyJson(next.problem_statements_json),
-        judging_json: stringifyJson(next.judging_json),
+
+        fee: next.fee ?? "",
+        prize_pool: next.prize_pool ?? "",
+        winner_prize: next.winner_prize ?? "",
+        runner_prize: next.runner_prize ?? "",
       });
+
+      setSchedule(toScheduleItems(next.schedule_json));
+      setProblemStatements(toProblemItems(next.problem_statements_json));
+      setJudgingCriteria(toJudgingItems(next.judging_json));
+      setBenefits(toStringList(next.benefits_json));
+      setSampleRoles(toStringList(next.sample_roles_json));
 
       alert("Saved");
     } catch (err) {
@@ -429,6 +557,52 @@ export default function AdminEventEditPage() {
       alert("Network error");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function deleteRegistrationsForEvent() {
+    if (!id) return;
+
+    if (deleteConfirmText.trim() !== "DELETE") {
+      alert('Type DELETE to confirm.');
+      return;
+    }
+
+    const ok = window.confirm(
+      "This will permanently delete all registrations for this event. This cannot be undone."
+    );
+
+    if (!ok) return;
+
+    try {
+      setDeletingRegistrations(true);
+
+      const res = await fetch("/api/admin/registrations/bulk-delete", {
+        method: "DELETE",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          mode: "single",
+          eventId: id,
+        }),
+      });
+
+      const json = await res.json().catch(() => null);
+
+      if (!res.ok || !json?.ok) {
+        alert(json?.error || "Failed to delete registrations");
+        return;
+      }
+
+      alert(
+        `Deleted ${json?.data?.deletedTeams ?? 0} teams and ${json?.data?.deletedMembers ?? 0} team members.`
+      );
+
+      setDeleteConfirmText("");
+    } catch (err) {
+      console.error(err);
+      alert("Network error");
+    } finally {
+      setDeletingRegistrations(false);
     }
   }
 
@@ -447,14 +621,14 @@ export default function AdminEventEditPage() {
         <div className="space-y-1">
           <h1 className="text-2xl font-semibold text-foreground">Edit Event</h1>
           <p className="text-sm text-foreground/60">
-            Update structured event content, registration rules, and publishing state.
+            Update structured event content, registration rules, pricing, schedule, and publishing state.
           </p>
         </div>
 
         <div className="flex flex-wrap gap-2">
           <button
             className="rounded-xl border border-border bg-background/40 px-4 py-2 text-xs hover:bg-background/60 disabled:opacity-50"
-            disabled={saving || loading}
+            disabled={saving || loading || deletingRegistrations}
             onClick={() => router.push("/admin/events")}
           >
             Back
@@ -471,7 +645,7 @@ export default function AdminEventEditPage() {
 
           <button
             className="rounded-xl border border-border bg-background/40 px-4 py-2 text-xs hover:bg-background/60 disabled:opacity-50"
-            disabled={saving || loading}
+            disabled={saving || loading || deletingRegistrations}
             onClick={save}
           >
             {saving ? "Saving…" : "Save"}
@@ -758,32 +932,96 @@ export default function AdminEventEditPage() {
               </section>
             )}
 
-            {isWorkshopLike && (
-              <section className="space-y-4">
-                <h2 className="text-lg font-semibold text-foreground">
-                  Workshop content
-                </h2>
+            <section className="space-y-4">
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">Schedule</h2>
+                <p className="mt-1 text-sm text-foreground/60">
+                  Update the event flow using day, time, and session title.
+                </p>
+              </div>
 
-                <label className="grid gap-1">
-                  <span className="text-xs text-foreground/60">Schedule JSON</span>
-                  <textarea
-                    className={`${textareaClassName()} min-h-40 font-mono`}
-                    value={form.schedule_json}
-                    onChange={(e) => patchForm({ schedule_json: e.target.value })}
-                    placeholder='[{"day":"Day 1","time":"9:30 AM","title":"Intro Session"}]'
-                  />
-                </label>
-              </section>
-            )}
+              <div className="space-y-3">
+                {schedule.map((item, index) => (
+                  <div key={index} className={rowCardClassName()}>
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_1fr_2fr_auto]">
+                      <input
+                        className={inputClassName()}
+                        placeholder="Day"
+                        value={item.day}
+                        onChange={(e) => {
+                          const next = [...schedule];
+                          next[index] = { ...next[index], day: e.target.value };
+                          setSchedule(next);
+                        }}
+                      />
+
+                      <input
+                        className={inputClassName()}
+                        placeholder="Time"
+                        value={item.time}
+                        onChange={(e) => {
+                          const next = [...schedule];
+                          next[index] = { ...next[index], time: e.target.value };
+                          setSchedule(next);
+                        }}
+                      />
+
+                      <input
+                        className={inputClassName()}
+                        placeholder="Session title"
+                        value={item.title}
+                        onChange={(e) => {
+                          const next = [...schedule];
+                          next[index] = { ...next[index], title: e.target.value };
+                          setSchedule(next);
+                        }}
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSchedule((prev) =>
+                            prev.length === 1
+                              ? [{ day: "", time: "", title: "" }]
+                              : prev.filter((_, i) => i !== index)
+                          )
+                        }
+                        className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSchedule((prev) => [
+                      ...prev,
+                      { day: "", time: "", title: "" },
+                    ])
+                  }
+                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-foreground"
+                >
+                  + Add schedule row
+                </button>
+              </div>
+            </section>
 
             {isHackathonLike && (
               <section className="space-y-4">
-                <h2 className="text-lg font-semibold text-foreground">
-                  Hackathon content
-                </h2>
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground">
+                    Hackathon content
+                  </h2>
+                  <p className="mt-1 text-sm text-foreground/60">
+                    Update rules, challenge statements, judging, pricing, and benefits.
+                  </p>
+                </div>
 
                 <label className="grid gap-1">
-                  <span className="text-xs text-foreground/60">Rules Markdown</span>
+                  <span className="text-xs text-foreground/60">Rules</span>
                   <textarea
                     className={`${textareaClassName()} min-h-32`}
                     value={form.rules_markdown}
@@ -794,43 +1032,281 @@ export default function AdminEventEditPage() {
                   />
                 </label>
 
-                <label className="grid gap-1">
-                  <span className="text-xs text-foreground/60">
-                    Problem Statements JSON
-                  </span>
-                  <textarea
-                    className={`${textareaClassName()} min-h-40 font-mono`}
-                    value={form.problem_statements_json}
-                    onChange={(e) =>
-                      patchForm({ problem_statements_json: e.target.value })
+                <div className="space-y-3">
+                  <div>
+                    <h3 className="text-sm font-medium text-foreground">
+                      Problem statements
+                    </h3>
+                    <p className="mt-1 text-xs text-foreground/55">
+                      These are saved using title and summary in the same admin JSON format.
+                    </p>
+                  </div>
+
+                  {problemStatements.map((item, index) => (
+                    <div key={index} className={rowCardClassName()}>
+                      <div className="space-y-3">
+                        <input
+                          className={inputClassName()}
+                          placeholder="Problem title"
+                          value={item.title}
+                          onChange={(e) => {
+                            const next = [...problemStatements];
+                            next[index] = { ...next[index], title: e.target.value };
+                            setProblemStatements(next);
+                          }}
+                        />
+
+                        <textarea
+                          className={textareaClassName()}
+                          placeholder="Problem summary"
+                          rows={4}
+                          value={item.summary}
+                          onChange={(e) => {
+                            const next = [...problemStatements];
+                            next[index] = {
+                              ...next[index],
+                              summary: e.target.value,
+                            };
+                            setProblemStatements(next);
+                          }}
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setProblemStatements((prev) =>
+                              prev.length === 1
+                                ? [{ title: "", summary: "" }]
+                                : prev.filter((_, i) => i !== index)
+                            )
+                          }
+                          className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setProblemStatements((prev) => [
+                        ...prev,
+                        { title: "", summary: "" },
+                      ])
                     }
-                    placeholder='[{"title":"Water Access","difficulty":"Beginner","summary":"Build a solution..."}]'
-                  />
-                </label>
+                    className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-foreground"
+                  >
+                    + Add problem statement
+                  </button>
+                </div>
 
-                <label className="grid gap-1">
-                  <span className="text-xs text-foreground/60">Judging JSON</span>
-                  <textarea
-                    className={`${textareaClassName()} min-h-40 font-mono`}
-                    value={form.judging_json}
-                    onChange={(e) => patchForm({ judging_json: e.target.value })}
-                    placeholder='[{"criterion":"Impact","weight":"30%"}]'
-                  />
-                </label>
+                <div className="space-y-3">
+                  <div>
+                    <h3 className="text-sm font-medium text-foreground">
+                      Judging criteria
+                    </h3>
+                  </div>
 
-                {!isWorkshopLike && (
-                  <label className="grid gap-1">
-                    <span className="text-xs text-foreground/60">Schedule JSON</span>
-                    <textarea
-                      className={`${textareaClassName()} min-h-40 font-mono`}
-                      value={form.schedule_json}
-                      onChange={(e) =>
-                        patchForm({ schedule_json: e.target.value })
-                      }
-                      placeholder='[{"time":"10:00 AM","title":"Hackathon Kickoff"}]'
+                  {judgingCriteria.map((item, index) => (
+                    <div key={index} className={rowCardClassName()}>
+                      <div className="grid grid-cols-1 gap-3 md:grid-cols-[2fr_1fr_auto]">
+                        <input
+                          className={inputClassName()}
+                          placeholder="Criterion"
+                          value={item.criterion}
+                          onChange={(e) => {
+                            const next = [...judgingCriteria];
+                            next[index] = {
+                              ...next[index],
+                              criterion: e.target.value,
+                            };
+                            setJudgingCriteria(next);
+                          }}
+                        />
+
+                        <input
+                          className={inputClassName()}
+                          placeholder="Weight"
+                          value={item.weight}
+                          onChange={(e) => {
+                            const next = [...judgingCriteria];
+                            next[index] = {
+                              ...next[index],
+                              weight: e.target.value,
+                            };
+                            setJudgingCriteria(next);
+                          }}
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setJudgingCriteria((prev) =>
+                              prev.length === 1
+                                ? [{ criterion: "", weight: "" }]
+                                : prev.filter((_, i) => i !== index)
+                            )
+                          }
+                          className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setJudgingCriteria((prev) => [
+                        ...prev,
+                        { criterion: "", weight: "" },
+                      ])
+                    }
+                    className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-foreground"
+                  >
+                    + Add judging criterion
+                  </button>
+                </div>
+              </section>
+            )}
+
+            {(isWorkshopLike || isHackathonLike) && (
+              <section className="space-y-4">
+                <h2 className="text-lg font-semibold text-foreground">
+                  Pricing and rewards
+                </h2>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <input
+                    className={inputClassName()}
+                    placeholder="Registration fee"
+                    value={form.fee}
+                    onChange={(e) => patchForm({ fee: e.target.value })}
+                  />
+
+                  <input
+                    className={inputClassName()}
+                    placeholder="Prize pool"
+                    value={form.prize_pool}
+                    onChange={(e) => patchForm({ prize_pool: e.target.value })}
+                  />
+
+                  <input
+                    className={inputClassName()}
+                    placeholder="Winner prize"
+                    value={form.winner_prize}
+                    onChange={(e) => patchForm({ winner_prize: e.target.value })}
+                  />
+
+                  <input
+                    className={inputClassName()}
+                    placeholder="Runner prize"
+                    value={form.runner_prize}
+                    onChange={(e) => patchForm({ runner_prize: e.target.value })}
+                  />
+                </div>
+              </section>
+            )}
+
+            <section className="space-y-4">
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">Benefits</h2>
+                <p className="mt-1 text-sm text-foreground/60">
+                  Add participant benefits like certificates, networking, mentorship, or swag.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                {benefits.map((item, index) => (
+                  <div key={index} className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto]">
+                    <input
+                      className={inputClassName()}
+                      placeholder="Benefit"
+                      value={item}
+                      onChange={(e) => {
+                        const next = [...benefits];
+                        next[index] = e.target.value;
+                        setBenefits(next);
+                      }}
                     />
-                  </label>
-                )}
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setBenefits((prev) =>
+                          prev.length === 1 ? [""] : prev.filter((_, i) => i !== index)
+                        )
+                      }
+                      className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={() => setBenefits((prev) => [...prev, ""])}
+                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-foreground"
+                >
+                  + Add benefit
+                </button>
+              </div>
+            </section>
+
+            {isTeamEvent && (
+              <section className="space-y-4">
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground">
+                    Sample team roles
+                  </h2>
+                  <p className="mt-1 text-sm text-foreground/60">
+                    Add suggested roles for role-based or hackathon teams.
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  {sampleRoles.map((item, index) => (
+                    <div
+                      key={index}
+                      className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto]"
+                    >
+                      <input
+                        className={inputClassName()}
+                        placeholder="Role"
+                        value={item}
+                        onChange={(e) => {
+                          const next = [...sampleRoles];
+                          next[index] = e.target.value;
+                          setSampleRoles(next);
+                        }}
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSampleRoles((prev) =>
+                            prev.length === 1 ? [""] : prev.filter((_, i) => i !== index)
+                          )
+                        }
+                        className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+
+                  <button
+                    type="button"
+                    onClick={() => setSampleRoles((prev) => [...prev, ""])}
+                    className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-foreground"
+                  >
+                    + Add role
+                  </button>
+                </div>
               </section>
             )}
 
@@ -851,6 +1327,40 @@ export default function AdminEventEditPage() {
                 <div>Updated: {new Date(event.updated_at).toLocaleString()}</div>
               ) : null}
             </div>
+
+            <section className="space-y-4 rounded-2xl border border-red-500/20 bg-red-500/5 p-5">
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold text-red-300">Danger Zone</h2>
+                <p className="text-sm text-foreground/70">
+                  Delete all registrations linked to this event. This removes team
+                  records and team member records for this event.
+                </p>
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
+                <label className="grid gap-1">
+                  <span className="text-xs text-foreground/60">
+                    Type <span className="font-semibold text-red-300">DELETE</span>{" "}
+                    to confirm
+                  </span>
+                  <input
+                    className={inputClassName()}
+                    value={deleteConfirmText}
+                    onChange={(e) => setDeleteConfirmText(e.target.value)}
+                    placeholder="DELETE"
+                  />
+                </label>
+
+                <button
+                  type="button"
+                  onClick={deleteRegistrationsForEvent}
+                  disabled={loading || deletingRegistrations || !event}
+                  className="rounded-xl border border-red-500/30 bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {deletingRegistrations ? "Deleting…" : "Delete Registrations"}
+                </button>
+              </div>
+            </section>
           </div>
         )}
       </section>

@@ -3,6 +3,21 @@
 export type EventType = "workshop" | "hackathon" | "hybrid";
 export type RegistrationType = "individual" | "team" | "both";
 
+export type ScheduleItem = {
+  time: string;
+  title: string;
+};
+
+export type JudgingCriteria = {
+  criteria: string;
+  weight: string;
+};
+
+export type ProblemStatement = {
+  title: string;
+  description: string;
+};
+
 export type EventListItem = {
   id: string;
   slug: string;
@@ -35,9 +50,18 @@ export type EventListItem = {
   role_based_team?: boolean | null;
 
   rules_markdown?: string | null;
-  schedule_json?: unknown | null;
-  problem_statements_json?: unknown | null;
-  judging_json?: unknown | null;
+
+  schedule_json?: ScheduleItem[] | null;
+  problem_statements_json?: ProblemStatement[] | null;
+  judging_json?: JudgingCriteria[] | null;
+
+  entry_fee?: number | null;
+  prize_first?: number | null;
+  prize_second?: number | null;
+  prize_third?: number | null;
+
+  benefits_json?: string[] | null;
+  sample_roles_json?: string[] | null;
 };
 
 export function eventMeta(e: EventListItem) {

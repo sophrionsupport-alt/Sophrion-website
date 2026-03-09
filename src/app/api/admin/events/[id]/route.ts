@@ -8,17 +8,6 @@ type EventType = "workshop" | "hackathon" | "hybrid";
 type RegistrationType = "individual" | "team" | "both";
 type EventMode = "online" | "offline" | "hybrid";
 
-type EventRowLite = {
-  id: string;
-  event_type: EventType | null;
-  registration_type: RegistrationType | null;
-  min_team_size: number | null;
-  max_team_size: number | null;
-  requires_female_member: boolean | null;
-  required_female_count: number | null;
-  role_based_team: boolean | null;
-};
-
 function json(
   ok: boolean,
   init?: { data?: unknown; error?: string; message?: string },
@@ -40,51 +29,34 @@ function supabaseAdmin() {
   });
 }
 
-function parseNullableString(value: unknown): string | null {
-  if (value == null) return null;
-  const trimmed = String(value).trim();
-  return trimmed || null;
+function parseNullableString(v: unknown): string | null {
+  if (v == null) return null;
+  const t = String(v).trim();
+  return t || null;
 }
 
-function parseBoolean(value: unknown): boolean | null {
-  if (typeof value === "boolean") return value;
-  return null;
+function parseNullableInt(v: unknown): number | null {
+  if (v == null || v === "") return null;
+
+  const n = Number(v);
+  if (!Number.isFinite(n)) return null;
+
+  return Math.trunc(n);
 }
 
-function parseNullableInt(value: unknown): number | null {
-  if (value === null || value === undefined || value === "") return null;
+function parseNullableJson(v: unknown) {
+  if (v == null || v === "") return null;
 
-  if (typeof value === "number" && Number.isInteger(value)) {
-    return value;
-  }
-
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    if (!trimmed) return null;
-
-    const parsed = Number(trimmed);
-    if (Number.isInteger(parsed)) return parsed;
-  }
-
-  return NaN;
-}
-
-function parseNullableJson(value: unknown) {
-  if (value === null || value === undefined || value === "") return null;
-
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    if (!trimmed) return null;
-
+  if (typeof v === "string") {
     try {
-      return JSON.parse(trimmed);
+      return JSON.parse(v);
     } catch {
       return NaN;
     }
   }
 
-  if (typeof value === "object") {
-    return value;
+  if (typeof v === "object") {
+    return v;
   }
 
   return NaN;
@@ -129,42 +101,6 @@ function parseEventMode(value: unknown): EventMode | null {
   return null;
 }
 
-type EventUpdateBody = {
-  title?: unknown;
-  subtitle?: unknown;
-  slug?: unknown;
-
-  description?: unknown;
-  overview?: unknown;
-
-  mode?: unknown;
-  venue?: unknown;
-  city?: unknown;
-  state?: unknown;
-
-  start_at?: unknown;
-  end_at?: unknown;
-
-  banner_url?: unknown;
-
-  is_published?: unknown;
-  registration_open?: unknown;
-
-  event_type?: unknown;
-  registration_type?: unknown;
-
-  min_team_size?: unknown;
-  max_team_size?: unknown;
-  requires_female_member?: unknown;
-  required_female_count?: unknown;
-  role_based_team?: unknown;
-
-  rules_markdown?: unknown;
-  schedule_json?: unknown;
-  problem_statements_json?: unknown;
-  judging_json?: unknown;
-};
-
 const EVENT_SELECT = `
   id,
   slug,
@@ -192,6 +128,12 @@ const EVENT_SELECT = `
   schedule_json,
   problem_statements_json,
   judging_json,
+  fee,
+  prize_pool,
+  winner_prize,
+  runner_prize,
+  benefits_json,
+  sample_roles_json,
   created_at,
   updated_at
 `;
@@ -251,7 +193,7 @@ export async function PATCH(
     return json(false, { error: "Event id is required." }, 400);
   }
 
-  let body: EventUpdateBody = {};
+  let body: Record<string, unknown> = {};
   try {
     body = await req.json();
   } catch {
@@ -259,50 +201,17 @@ export async function PATCH(
   }
 
   const supabase = supabaseAdmin();
-
-  const { data: existing, error: existingError } = await supabase
-    .from("events")
-    .select(`
-      id,
-      event_type,
-      registration_type,
-      min_team_size,
-      max_team_size,
-      requires_female_member,
-      required_female_count,
-      role_based_team
-    `)
-    .eq("id", id)
-    .single<EventRowLite>();
-
-  if (existingError || !existing) {
-    const httpStatus = existingError?.code === "PGRST116" ? 404 : 500;
-
-    return json(
-      false,
-      {
-        error:
-          existingError?.code === "PGRST116"
-            ? "Event not found."
-            : existingError?.message || "Failed to load event.",
-      },
-      httpStatus
-    );
-  }
-
   const updates: Record<string, unknown> = {};
 
   if (body.title !== undefined) {
-    const title = String(body.title ?? "").trim();
+    const title = parseNullableString(body.title);
     if (!title) {
       return json(false, { error: "Title is required." }, 400);
     }
     updates.title = title;
   }
 
-  if (body.subtitle !== undefined) {
-    updates.subtitle = parseNullableString(body.subtitle);
-  }
+  if (body.subtitle !== undefined) updates.subtitle = parseNullableString(body.subtitle);
 
   if (body.slug !== undefined) {
     const slug = parseNullableString(body.slug);
@@ -321,39 +230,23 @@ export async function PATCH(
   }
 
   if (body.mode !== undefined) {
-    if (body.mode === null || body.mode === "") {
-      updates.mode = null;
-    } else {
-      const parsedMode = parseEventMode(body.mode);
-      if (!parsedMode) {
-        return json(
-          false,
-          { error: "mode must be one of online, offline, or hybrid." },
-          400
-        );
-      }
-      updates.mode = parsedMode;
+    const parsed = parseEventMode(body.mode);
+    if (!parsed && body.mode != null && body.mode !== "") {
+      return json(false, { error: "Invalid mode." }, 400);
     }
+    updates.mode = parsed;
   }
 
-  if (body.venue !== undefined) {
-    updates.venue = parseNullableString(body.venue);
-  }
-
-  if (body.city !== undefined) {
-    updates.city = parseNullableString(body.city);
-  }
-
-  if (body.state !== undefined) {
-    updates.state = parseNullableString(body.state);
-  }
+  if (body.venue !== undefined) updates.venue = parseNullableString(body.venue);
+  if (body.city !== undefined) updates.city = parseNullableString(body.city);
+  if (body.state !== undefined) updates.state = parseNullableString(body.state);
 
   if (body.start_at !== undefined) {
-    updates.start_at = body.start_at == null ? null : String(body.start_at);
+    updates.start_at = parseNullableString(body.start_at);
   }
 
   if (body.end_at !== undefined) {
-    updates.end_at = body.end_at == null ? null : String(body.end_at);
+    updates.end_at = parseNullableString(body.end_at);
   }
 
   if (body.banner_url !== undefined) {
@@ -361,185 +254,59 @@ export async function PATCH(
   }
 
   if (body.is_published !== undefined) {
-    const parsed = parseBoolean(body.is_published);
-    if (parsed === null) {
-      return json(false, { error: "is_published must be a boolean." }, 400);
+    if (typeof body.is_published !== "boolean") {
+      return json(false, { error: "is_published must be boolean." }, 400);
     }
-    updates.is_published = parsed;
+    updates.is_published = body.is_published;
   }
 
   if (body.registration_open !== undefined) {
-    const parsed = parseBoolean(body.registration_open);
-    if (parsed === null) {
-      return json(false, { error: "registration_open must be a boolean." }, 400);
+    if (typeof body.registration_open !== "boolean") {
+      return json(false, { error: "registration_open must be boolean." }, 400);
     }
-    updates.registration_open = parsed;
+    updates.registration_open = body.registration_open;
   }
-
-  let nextEventType: EventType =
-    existing.event_type ?? "workshop";
 
   if (body.event_type !== undefined) {
     const parsed = parseEventType(body.event_type);
     if (!parsed) {
-      return json(
-        false,
-        {
-          error: "event_type must be one of workshop, hackathon, or hybrid.",
-        },
-        400
-      );
+      return json(false, { error: "Invalid event_type." }, 400);
     }
-    nextEventType = parsed;
     updates.event_type = parsed;
   }
-
-  let nextRegistrationType: RegistrationType =
-    existing.registration_type ?? "individual";
 
   if (body.registration_type !== undefined) {
     const parsed = parseRegistrationType(body.registration_type);
     if (!parsed) {
-      return json(
-        false,
-        {
-          error:
-            "registration_type must be one of individual, team, or both.",
-        },
-        400
-      );
+      return json(false, { error: "Invalid registration_type." }, 400);
     }
-    nextRegistrationType = parsed;
     updates.registration_type = parsed;
   }
 
-  const rawMin =
-    body.min_team_size !== undefined
-      ? parseNullableInt(body.min_team_size)
-      : existing.min_team_size;
-
-  const rawMax =
-    body.max_team_size !== undefined
-      ? parseNullableInt(body.max_team_size)
-      : existing.max_team_size;
-
-  const rawRequiresFemale =
-    body.requires_female_member !== undefined
-      ? parseBoolean(body.requires_female_member)
-      : existing.requires_female_member ?? false;
-
-  const rawRequiredFemaleCount =
-    body.required_female_count !== undefined
-      ? parseNullableInt(body.required_female_count)
-      : existing.required_female_count;
-
-  const rawRoleBasedTeam =
-    body.role_based_team !== undefined
-      ? parseBoolean(body.role_based_team)
-      : existing.role_based_team ?? false;
-
-  if (
-    body.requires_female_member !== undefined &&
-    rawRequiresFemale === null
-  ) {
-    return json(
-      false,
-      { error: "requires_female_member must be a boolean." },
-      400
-    );
+  if (body.min_team_size !== undefined) {
+    updates.min_team_size = parseNullableInt(body.min_team_size);
   }
 
-  if (body.role_based_team !== undefined && rawRoleBasedTeam === null) {
-    return json(
-      false,
-      { error: "role_based_team must be a boolean." },
-      400
-    );
+  if (body.max_team_size !== undefined) {
+    updates.max_team_size = parseNullableInt(body.max_team_size);
   }
 
-  if (
-    Number.isNaN(rawMin) ||
-    Number.isNaN(rawMax) ||
-    Number.isNaN(rawRequiredFemaleCount)
-  ) {
-    return json(
-      false,
-      {
-        error:
-          "min_team_size, max_team_size, and required_female_count must be valid integers.",
-      },
-      400
-    );
+  if (body.requires_female_member !== undefined) {
+    if (typeof body.requires_female_member !== "boolean") {
+      return json(false, { error: "requires_female_member must be boolean." }, 400);
+    }
+    updates.requires_female_member = body.requires_female_member;
   }
 
-  const needsTeamRules =
-    nextRegistrationType === "team" || nextRegistrationType === "both";
+  if (body.required_female_count !== undefined) {
+    updates.required_female_count = parseNullableInt(body.required_female_count);
+  }
 
-  if (!needsTeamRules) {
-    updates.min_team_size = null;
-    updates.max_team_size = null;
-    updates.requires_female_member = false;
-    updates.required_female_count = null;
-    updates.role_based_team = false;
-  } else {
-    if (rawMin == null || rawMax == null) {
-      return json(
-        false,
-        {
-          error:
-            "min_team_size and max_team_size are required for team registration.",
-        },
-        400
-      );
+  if (body.role_based_team !== undefined) {
+    if (typeof body.role_based_team !== "boolean") {
+      return json(false, { error: "role_based_team must be boolean." }, 400);
     }
-
-    if (rawMin < 1) {
-      return json(false, { error: "min_team_size must be at least 1." }, 400);
-    }
-
-    if (rawMax < rawMin) {
-      return json(
-        false,
-        { error: "max_team_size must be greater than or equal to min_team_size." },
-        400
-      );
-    }
-
-    const requiresFemaleMember = Boolean(rawRequiresFemale);
-    const roleBasedTeam = Boolean(rawRoleBasedTeam);
-
-    let requiredFemaleCount: number | null = rawRequiredFemaleCount;
-
-    if (!requiresFemaleMember) {
-      requiredFemaleCount = null;
-    } else {
-      if (requiredFemaleCount == null || requiredFemaleCount < 1) {
-        return json(
-          false,
-          {
-            error:
-              "required_female_count must be at least 1 when female member requirement is enabled.",
-          },
-          400
-        );
-      }
-
-      if (requiredFemaleCount > rawMax) {
-        return json(
-          false,
-          {
-            error: "required_female_count cannot exceed max_team_size.",
-          },
-          400
-        );
-      }
-    }
-
-    updates.min_team_size = rawMin;
-    updates.max_team_size = rawMax;
-    updates.requires_female_member = requiresFemaleMember;
-    updates.required_female_count = requiredFemaleCount;
-    updates.role_based_team = roleBasedTeam;
+    updates.role_based_team = body.role_based_team;
   }
 
   if (body.rules_markdown !== undefined) {
@@ -557,11 +324,7 @@ export async function PATCH(
   if (body.problem_statements_json !== undefined) {
     const parsed = parseNullableJson(body.problem_statements_json);
     if (Number.isNaN(parsed)) {
-      return json(
-        false,
-        { error: "problem_statements_json must be valid JSON." },
-        400
-      );
+      return json(false, { error: "problem_statements_json must be valid JSON." }, 400);
     }
     updates.problem_statements_json = parsed;
   }
@@ -574,8 +337,36 @@ export async function PATCH(
     updates.judging_json = parsed;
   }
 
-  if (Object.keys(updates).length === 0) {
-    return json(false, { error: "Nothing to update." }, 400);
+  if (body.fee !== undefined) {
+    updates.fee = parseNullableString(body.fee);
+  }
+
+  if (body.prize_pool !== undefined) {
+    updates.prize_pool = parseNullableString(body.prize_pool);
+  }
+
+  if (body.winner_prize !== undefined) {
+    updates.winner_prize = parseNullableString(body.winner_prize);
+  }
+
+  if (body.runner_prize !== undefined) {
+    updates.runner_prize = parseNullableString(body.runner_prize);
+  }
+
+  if (body.benefits_json !== undefined) {
+    const parsed = parseNullableJson(body.benefits_json);
+    if (Number.isNaN(parsed)) {
+      return json(false, { error: "benefits_json must be valid JSON." }, 400);
+    }
+    updates.benefits_json = parsed;
+  }
+
+  if (body.sample_roles_json !== undefined) {
+    const parsed = parseNullableJson(body.sample_roles_json);
+    if (Number.isNaN(parsed)) {
+      return json(false, { error: "sample_roles_json must be valid JSON." }, 400);
+    }
+    updates.sample_roles_json = parsed;
   }
 
   updates.updated_at = new Date().toISOString();
@@ -588,19 +379,53 @@ export async function PATCH(
     .single();
 
   if (error) {
-    const httpStatus = error.code === "PGRST116" ? 404 : 500;
-
-    return json(
-      false,
-      {
-        error:
-          error.code === "PGRST116"
-            ? "Event not found."
-            : error.message,
-      },
-      httpStatus
-    );
+    return json(false, { error: error.message }, 500);
   }
 
   return json(true, { data, message: "Event updated successfully." });
+}
+
+export async function DELETE(
+  _req: Request,
+  ctx: { params: Promise<{ id: string }> }
+) {
+  const auth = await requireAdmin();
+
+  if (!auth.ok) {
+    return json(false, { error: auth.error }, auth.status);
+  }
+
+  const { id } = await ctx.params;
+
+  if (!id) {
+    return json(false, { error: "Event id is required." }, 400);
+  }
+
+  const supabase = supabaseAdmin();
+
+  const { data: event, error: fetchError } = await supabase
+    .from("events")
+    .select("id, is_published")
+    .eq("id", id)
+    .single();
+
+  if (fetchError) {
+    return json(false, { error: fetchError.message }, 500);
+  }
+
+  if (event.is_published) {
+    return json(
+      false,
+      { error: "Published events cannot be deleted. Unpublish first." },
+      400
+    );
+  }
+
+  const { error } = await supabase.from("events").delete().eq("id", id);
+
+  if (error) {
+    return json(false, { error: error.message }, 500);
+  }
+
+  return json(true, { message: "Event deleted successfully." });
 }

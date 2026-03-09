@@ -9,13 +9,14 @@ export type AdminRowStatus =
   | "published"
   | "draft"
   | "active"
+  | "team"
   | "unsubscribed";
 
 export type AdminRow = {
   id: string;
   primary: string;
   secondary?: string;
-  status?: AdminRowStatus; // now optional so pages without status won't break
+  status?: AdminRowStatus;
   meta?: string;
 };
 
@@ -45,7 +46,8 @@ export default function AdminTable({
   const selected = selectedIds ?? [];
 
   const allIds = rows.map((r) => r.id);
-  const allSelected = selectable && rows.length > 0 && selected.length === rows.length;
+  const allSelected =
+    selectable && rows.length > 0 && selected.length === rows.length;
 
   function toggleAll() {
     if (!selectable) return;
@@ -54,8 +56,11 @@ export default function AdminTable({
 
   function toggleOne(id: string) {
     if (!selectable) return;
+
     onSelectedIdsChange(
-      selected.includes(id) ? selected.filter((x) => x !== id) : [...selected, id]
+      selected.includes(id)
+        ? selected.filter((x) => x !== id)
+        : [...selected, id]
     );
   }
 
@@ -74,7 +79,9 @@ export default function AdminTable({
 
     if (status === "rejected")
       return (
-        <span className={`${base} border-red-500/20 bg-red-500/10 text-red-200`}>
+        <span
+          className={`${base} border-red-500/20 bg-red-500/10 text-red-200`}
+        >
           Rejected
         </span>
       );
@@ -106,6 +113,15 @@ export default function AdminTable({
         </span>
       );
 
+    if (status === "team")
+      return (
+        <span
+          className={`${base} border-purple-500/20 bg-purple-500/10 text-purple-200`}
+        >
+          Team
+        </span>
+      );
+
     if (status === "unsubscribed")
       return (
         <span
@@ -116,7 +132,9 @@ export default function AdminTable({
       );
 
     return (
-      <span className={`${base} border-amber-500/20 bg-amber-500/10 text-amber-200`}>
+      <span
+        className={`${base} border-amber-500/20 bg-amber-500/10 text-amber-200`}
+      >
         Pending
       </span>
     );
@@ -127,7 +145,7 @@ export default function AdminTable({
       <table className="w-full text-sm">
         <thead className="border-b border-border bg-card">
           <tr className="text-left">
-            {selectable ? (
+            {selectable && (
               <th className="w-10 px-4 py-3">
                 <input
                   type="checkbox"
@@ -136,24 +154,32 @@ export default function AdminTable({
                   aria-label="Select all"
                 />
               </th>
-            ) : null}
+            )}
 
-            <th className="px-4 py-3">{columnsLabel?.primary ?? "Item"}</th>
+            <th className="px-4 py-3">
+              {columnsLabel?.primary ?? "Item"}
+            </th>
 
-            <th className="px-4 py-3">{columnsLabel?.status ?? "Status"}</th>
+            <th className="px-4 py-3">
+              {columnsLabel?.status ?? "Status"}
+            </th>
 
-            <th className="px-4 py-3">{columnsLabel?.meta ?? "Meta"}</th>
+            <th className="px-4 py-3">
+              {columnsLabel?.meta ?? "Meta"}
+            </th>
 
-            {hasActions ? (
-              <th className="px-4 py-3">{columnsLabel?.actions ?? "Actions"}</th>
-            ) : null}
+            {hasActions && (
+              <th className="px-4 py-3">
+                {columnsLabel?.actions ?? "Actions"}
+              </th>
+            )}
           </tr>
         </thead>
 
         <tbody>
           {rows.map((r) => (
             <tr key={r.id} className="border-b border-border/60">
-              {selectable ? (
+              {selectable && (
                 <td className="px-4 py-3 align-top">
                   <input
                     type="checkbox"
@@ -162,34 +188,43 @@ export default function AdminTable({
                     aria-label={`Select ${r.primary}`}
                   />
                 </td>
-              ) : null}
+              )}
 
               <td className="px-4 py-3 align-top">
-                <div className="font-medium text-foreground">{r.primary}</div>
-                {r.secondary ? (
+                <div className="font-medium text-foreground">
+                  {r.primary}
+                </div>
+
+                {r.secondary && (
                   <div className="mt-0.5 text-xs text-foreground/60">
                     {r.secondary}
                   </div>
-                ) : null}
+                )}
               </td>
 
               <td className="px-4 py-3 align-top">
-                {r.status ? <StatusBadge status={r.status} /> : <span className="text-xs text-foreground/50">—</span>}
+                {r.status ? (
+                  <StatusBadge status={r.status} />
+                ) : (
+                  <span className="text-xs text-foreground/50">—</span>
+                )}
               </td>
 
               <td className="px-4 py-3 align-top text-foreground/70">
                 {r.meta ?? "—"}
               </td>
 
-              {hasActions ? (
+              {hasActions && (
                 <td className="px-4 py-3 align-top">
-                  <div className="flex flex-wrap gap-2">{renderActions?.(r)}</div>
+                  <div className="flex flex-wrap gap-2">
+                    {renderActions?.(r)}
+                  </div>
                 </td>
-              ) : null}
+              )}
             </tr>
           ))}
 
-          {rows.length === 0 ? (
+          {rows.length === 0 && (
             <tr>
               <td
                 className="px-4 py-10 text-center text-sm text-foreground/60"
@@ -198,7 +233,7 @@ export default function AdminTable({
                 No records found.
               </td>
             </tr>
-          ) : null}
+          )}
         </tbody>
       </table>
     </div>

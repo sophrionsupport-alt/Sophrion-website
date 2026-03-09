@@ -6,7 +6,8 @@ import { slugify } from "@/lib/utils/slugify";
 export const runtime = "nodejs";
 
 type EventType = "workshop" | "hackathon" | "hybrid";
-type RegistrationType = "individual" | "team";
+type RegistrationType = "individual" | "team" | "both";
+type EventMode = "online" | "offline" | "hybrid";
 
 function supabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -17,42 +18,35 @@ function supabaseAdmin() {
   }
 
   return createClient(url, key, {
-    auth: { persistSession: false },
+    auth: { persistSession: false, autoRefreshToken: false },
   });
 }
 
 function parseNullableString(value: unknown): string | null {
-  if (typeof value !== "string") return null;
-  const trimmed = value.trim();
-  return trimmed ? trimmed : null;
+  if (value == null) return null;
+  const trimmed = String(value).trim();
+  return trimmed || null;
 }
 
 function parseBoolean(value: unknown, fallback = false): boolean {
   if (typeof value === "boolean") return value;
+
   if (typeof value === "string") {
     const normalized = value.trim().toLowerCase();
     if (normalized === "true") return true;
     if (normalized === "false") return false;
   }
+
   return fallback;
 }
 
 function parseNullableInt(value: unknown): number | null {
   if (value === null || value === undefined || value === "") return null;
 
-  if (typeof value === "number" && Number.isInteger(value)) {
-    return value;
-  }
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return null;
 
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    if (!trimmed) return null;
-
-    const parsed = Number(trimmed);
-    if (Number.isInteger(parsed)) return parsed;
-  }
-
-  return NaN;
+  return Math.trunc(parsed);
 }
 
 function parseNullableJson(value: unknown) {
@@ -76,94 +70,52 @@ function parseNullableJson(value: unknown) {
   return NaN;
 }
 
-function normalizeEventType(value: unknown): EventType {
-  const raw = typeof value === "string" ? value.trim() : "";
-  return raw === "workshop" || raw === "hackathon" || raw === "hybrid"
-    ? raw
-    : "workshop";
+function parseEventType(value: unknown): EventType {
+  const normalized = String(value ?? "")
+    .trim()
+    .toLowerCase();
+
+  if (
+    normalized === "workshop" ||
+    normalized === "hackathon" ||
+    normalized === "hybrid"
+  ) {
+    return normalized;
+  }
+
+  return "workshop";
 }
 
-function normalizeRegistrationConfig(body: Record<string, unknown>) {
-  const rawType =
-    typeof body.registration_type === "string"
-      ? body.registration_type.trim()
-      : "";
+function parseRegistrationType(value: unknown): RegistrationType {
+  const normalized = String(value ?? "")
+    .trim()
+    .toLowerCase();
 
-  const registrationType: RegistrationType =
-    rawType === "team" || rawType === "individual" ? rawType : "individual";
-
-  let minTeamSize = parseNullableInt(body.min_team_size);
-  let maxTeamSize = parseNullableInt(body.max_team_size);
-  let requiredFemaleCount = parseNullableInt(body.required_female_count);
-
-  const requiresFemaleMember = parseBoolean(body.requires_female_member, false);
-  const roleBasedTeam = parseBoolean(body.role_based_team, false);
-
-  if (registrationType === "individual") {
-    return {
-      registration_type: registrationType,
-      min_team_size: null,
-      max_team_size: null,
-      requires_female_member: false,
-      required_female_count: null,
-      role_based_team: false,
-    };
+  if (
+    normalized === "individual" ||
+    normalized === "team" ||
+    normalized === "both"
+  ) {
+    return normalized;
   }
 
-  if (Number.isNaN(minTeamSize) || Number.isNaN(maxTeamSize)) {
-    return {
-      error: "Min team size and max team size must be valid integers.",
-    };
+  return "individual";
+}
+
+function parseEventMode(value: unknown): EventMode | null {
+  const normalized = String(value ?? "")
+    .trim()
+    .toLowerCase();
+
+  if (
+    normalized === "online" ||
+    normalized === "offline" ||
+    normalized === "hybrid"
+  ) {
+    return normalized;
   }
 
-  if (minTeamSize === null || maxTeamSize === null) {
-    return {
-      error: "Min team size and max team size are required for team registration.",
-    };
-  }
-
-  if (minTeamSize < 1) {
-    return {
-      error: "Min team size must be at least 1.",
-    };
-  }
-
-  if (maxTeamSize < minTeamSize) {
-    return {
-      error: "Max team size must be greater than or equal to min team size.",
-    };
-  }
-
-  if (!requiresFemaleMember) {
-    requiredFemaleCount = null;
-  } else {
-    if (Number.isNaN(requiredFemaleCount)) {
-      return {
-        error: "Required female count must be a valid integer.",
-      };
-    }
-
-    if (requiredFemaleCount === null || requiredFemaleCount < 1) {
-      return {
-        error: "Required female count must be at least 1 when female member requirement is enabled.",
-      };
-    }
-
-    if (requiredFemaleCount > maxTeamSize) {
-      return {
-        error: "Required female count cannot exceed max team size.",
-      };
-    }
-  }
-
-  return {
-    registration_type: registrationType,
-    min_team_size: minTeamSize,
-    max_team_size: maxTeamSize,
-    requires_female_member: requiresFemaleMember,
-    required_female_count: requiredFemaleCount,
-    role_based_team: roleBasedTeam,
-  };
+  return null;
 }
 
 export async function POST(req: Request) {
@@ -181,6 +133,7 @@ export async function POST(req: Request) {
     const supabase = supabaseAdmin();
 
     const title = String(body.title ?? "").trim();
+
     if (!title) {
       return NextResponse.json(
         { ok: false, error: "Title is required." },
@@ -188,84 +141,189 @@ export async function POST(req: Request) {
       );
     }
 
-    const eventType = normalizeEventType(body.event_type);
+    const requestedSlug = parseNullableString(body.slug);
+    const baseSlug = slugify(requestedSlug || title);
 
-    const baseSlug = slugify(
-      typeof body.slug === "string" && body.slug.trim() ? body.slug : title
-    );
-    const slug = `${baseSlug}-${Date.now()}`;
-
-    if (!slug) {
+    if (!baseSlug) {
       return NextResponse.json(
         { ok: false, error: "Unable to generate slug." },
         { status: 400 }
       );
     }
 
-    const registrationConfig = normalizeRegistrationConfig(body);
-    if ("error" in registrationConfig) {
-      return NextResponse.json(
-        { ok: false, error: registrationConfig.error },
-        { status: 400 }
-      );
+    const slug = `${baseSlug}-${Date.now()}`;
+
+    const eventType = parseEventType(body.event_type);
+    const registrationType = parseRegistrationType(body.registration_type);
+    const mode = parseEventMode(body.mode);
+
+    const minTeamSize =
+      registrationType === "team" || registrationType === "both"
+        ? parseNullableInt(body.min_team_size)
+        : null;
+
+    const maxTeamSize =
+      registrationType === "team" || registrationType === "both"
+        ? parseNullableInt(body.max_team_size)
+        : null;
+
+    const requiresFemaleMember =
+      registrationType === "team" || registrationType === "both"
+        ? parseBoolean(body.requires_female_member, false)
+        : false;
+
+    const requiredFemaleCount =
+      registrationType === "team" || registrationType === "both"
+        ? parseNullableInt(body.required_female_count)
+        : null;
+
+    const roleBasedTeam =
+      registrationType === "team" || registrationType === "both"
+        ? parseBoolean(body.role_based_team, false)
+        : false;
+
+    if (registrationType === "team" || registrationType === "both") {
+      if (minTeamSize == null || maxTeamSize == null) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error: "Min team size and max team size are required for team events.",
+          },
+          { status: 400 }
+        );
+      }
+
+      if (minTeamSize < 1) {
+        return NextResponse.json(
+          { ok: false, error: "Min team size must be at least 1." },
+          { status: 400 }
+        );
+      }
+
+      if (maxTeamSize < minTeamSize) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error: "Max team size must be greater than or equal to min team size.",
+          },
+          { status: 400 }
+        );
+      }
+
+      if (requiresFemaleMember) {
+        if (requiredFemaleCount == null || requiredFemaleCount < 1) {
+          return NextResponse.json(
+            {
+              ok: false,
+              error:
+                "Required female count must be a whole number greater than or equal to 1.",
+            },
+            { status: 400 }
+          );
+        }
+
+        if (requiredFemaleCount > maxTeamSize) {
+          return NextResponse.json(
+            {
+              ok: false,
+              error: "Required female count cannot be greater than max team size.",
+            },
+            { status: 400 }
+          );
+        }
+      }
     }
 
     const scheduleJson = parseNullableJson(body.schedule_json);
-    const problemStatementsJson = parseNullableJson(body.problem_statements_json);
-    const judgingJson = parseNullableJson(body.judging_json);
-
     if (Number.isNaN(scheduleJson)) {
       return NextResponse.json(
-        { ok: false, error: "Schedule JSON is invalid." },
+        { ok: false, error: "schedule_json must be valid JSON." },
         { status: 400 }
       );
     }
 
+    const problemStatementsJson = parseNullableJson(body.problem_statements_json);
     if (Number.isNaN(problemStatementsJson)) {
       return NextResponse.json(
-        { ok: false, error: "Problem statements JSON is invalid." },
+        { ok: false, error: "problem_statements_json must be valid JSON." },
         { status: 400 }
       );
     }
 
+    const judgingJson = parseNullableJson(body.judging_json);
     if (Number.isNaN(judgingJson)) {
       return NextResponse.json(
-        { ok: false, error: "Judging JSON is invalid." },
+        { ok: false, error: "judging_json must be valid JSON." },
         { status: 400 }
       );
     }
+
+    const benefitsJson = parseNullableJson(body.benefits_json);
+    if (Number.isNaN(benefitsJson)) {
+      return NextResponse.json(
+        { ok: false, error: "benefits_json must be valid JSON." },
+        { status: 400 }
+      );
+    }
+
+    const sampleRolesJson = parseNullableJson(body.sample_roles_json);
+    if (Number.isNaN(sampleRolesJson)) {
+      return NextResponse.json(
+        { ok: false, error: "sample_roles_json must be valid JSON." },
+        { status: 400 }
+      );
+    }
+
+    const payload = {
+      title,
+      slug,
+
+      subtitle: parseNullableString(body.subtitle),
+      description: parseNullableString(body.description),
+      overview: parseNullableString(body.overview),
+
+      mode,
+      venue: parseNullableString(body.venue),
+      city: parseNullableString(body.city),
+      state: parseNullableString(body.state),
+
+      start_at: parseNullableString(body.start_at),
+      end_at: parseNullableString(body.end_at),
+      banner_url: parseNullableString(body.banner_url),
+
+      is_published: parseBoolean(body.is_published, false),
+      registration_open: parseBoolean(body.registration_open, true),
+
+      event_type: eventType,
+      registration_type: registrationType,
+
+      min_team_size: minTeamSize,
+      max_team_size: maxTeamSize,
+      requires_female_member: requiresFemaleMember,
+      required_female_count: requiresFemaleMember ? requiredFemaleCount : null,
+      role_based_team: roleBasedTeam,
+
+      rules_markdown: parseNullableString(body.rules_markdown),
+
+      schedule_json: scheduleJson,
+      problem_statements_json: problemStatementsJson,
+      judging_json: judgingJson,
+
+      fee: parseNullableString(body.fee),
+      prize_pool: parseNullableString(body.prize_pool),
+      winner_prize: parseNullableString(body.winner_prize),
+      runner_prize: parseNullableString(body.runner_prize),
+
+      benefits_json: benefitsJson,
+      sample_roles_json:
+        registrationType === "team" || registrationType === "both"
+          ? sampleRolesJson
+          : null,
+    };
 
     const { data, error } = await supabase
       .from("events")
-      .insert([
-        {
-          title,
-          slug,
-          subtitle: parseNullableString(body.subtitle),
-          description: parseNullableString(body.description),
-          overview: parseNullableString(body.overview),
-          start_at: parseNullableString(body.start_at),
-          end_at: parseNullableString(body.end_at),
-          mode: parseNullableString(body.mode),
-          venue: parseNullableString(body.venue),
-          city: parseNullableString(body.city),
-          state: parseNullableString(body.state),
-          banner_url: parseNullableString(body.banner_url),
-          is_published: parseBoolean(body.is_published, false),
-          registration_open: parseBoolean(body.registration_open, true),
-          event_type: eventType,
-          registration_type: registrationConfig.registration_type,
-          min_team_size: registrationConfig.min_team_size,
-          max_team_size: registrationConfig.max_team_size,
-          requires_female_member: registrationConfig.requires_female_member,
-          required_female_count: registrationConfig.required_female_count,
-          role_based_team: registrationConfig.role_based_team,
-          rules_markdown: parseNullableString(body.rules_markdown),
-          schedule_json: scheduleJson,
-          problem_statements_json: problemStatementsJson,
-          judging_json: judgingJson,
-        },
-      ])
+      .insert([payload])
       .select()
       .single();
 

@@ -6,6 +6,22 @@ import { useRouter } from "next/navigation";
 type EventType = "workshop" | "hackathon" | "hybrid";
 type RegistrationType = "individual" | "team";
 
+type ScheduleItem = {
+  day: string;
+  time: string;
+  title: string;
+};
+
+type ProblemStatementItem = {
+  title: string;
+  summary: string;
+};
+
+type JudgingItem = {
+  criterion: string;
+  weight: string;
+};
+
 type EventFormState = {
   title: string;
   subtitle: string;
@@ -36,9 +52,11 @@ type EventFormState = {
   role_based_team: boolean;
 
   rules_markdown: string;
-  schedule_json: string;
-  problem_statements_json: string;
-  judging_json: string;
+
+  fee: string;
+  prize_pool: string;
+  winner_prize: string;
+  runner_prize: string;
 };
 
 function inputClassName() {
@@ -53,9 +71,44 @@ function sectionClassName() {
   return "rounded-2xl border border-white/10 bg-background/40 p-5";
 }
 
+function rowCardClassName() {
+  return "rounded-xl border border-white/10 bg-white/5 p-4";
+}
+
+function removeEmptyScheduleRows(items: ScheduleItem[]) {
+  return items
+    .map((item) => ({
+      day: item.day.trim(),
+      time: item.time.trim(),
+      title: item.title.trim(),
+    }))
+    .filter((item) => item.day || item.time || item.title);
+}
+
+function removeEmptyProblemRows(items: ProblemStatementItem[]) {
+  return items
+    .map((item) => ({
+      title: item.title.trim(),
+      summary: item.summary.trim(),
+    }))
+    .filter((item) => item.title || item.summary);
+}
+
+function removeEmptyJudgingRows(items: JudgingItem[]) {
+  return items
+    .map((item) => ({
+      criterion: item.criterion.trim(),
+      weight: item.weight.trim(),
+    }))
+    .filter((item) => item.criterion || item.weight);
+}
+
+function removeEmptyStringRows(items: string[]) {
+  return items.map((item) => item.trim()).filter(Boolean);
+}
+
 export default function NewEventPage() {
   const router = useRouter();
-
   const [loading, setLoading] = React.useState(false);
 
   const [form, setForm] = React.useState<EventFormState>({
@@ -88,10 +141,27 @@ export default function NewEventPage() {
     role_based_team: false,
 
     rules_markdown: "",
-    schedule_json: "",
-    problem_statements_json: "",
-    judging_json: "",
+
+    fee: "",
+    prize_pool: "",
+    winner_prize: "",
+    runner_prize: "",
   });
+
+  const [schedule, setSchedule] = React.useState<ScheduleItem[]>([
+    { day: "", time: "", title: "" },
+  ]);
+
+  const [problemStatements, setProblemStatements] = React.useState<
+    ProblemStatementItem[]
+  >([{ title: "", summary: "" }]);
+
+  const [judgingCriteria, setJudgingCriteria] = React.useState<JudgingItem[]>([
+    { criterion: "", weight: "" },
+  ]);
+
+  const [benefits, setBenefits] = React.useState<string[]>([""]);
+  const [sampleRoles, setSampleRoles] = React.useState<string[]>([""]);
 
   function update<K extends keyof EventFormState>(
     key: K,
@@ -105,17 +175,6 @@ export default function NewEventPage() {
     form.event_type === "hackathon" || form.event_type === "hybrid";
   const isWorkshopLike =
     form.event_type === "workshop" || form.event_type === "hybrid";
-
-  function validateJsonField(value: string, label: string) {
-    if (!value.trim()) return null;
-
-    try {
-      JSON.parse(value);
-      return null;
-    } catch {
-      return `${label} must be valid JSON.`;
-    }
-  }
 
   function validateForm() {
     if (!form.title.trim()) {
@@ -159,18 +218,6 @@ export default function NewEventPage() {
       }
     }
 
-    const scheduleJsonError = validateJsonField(form.schedule_json, "Schedule JSON");
-    if (scheduleJsonError) return scheduleJsonError;
-
-    const problemStatementsJsonError = validateJsonField(
-      form.problem_statements_json,
-      "Problem statements JSON"
-    );
-    if (problemStatementsJsonError) return problemStatementsJsonError;
-
-    const judgingJsonError = validateJsonField(form.judging_json, "Judging JSON");
-    if (judgingJsonError) return judgingJsonError;
-
     return null;
   }
 
@@ -185,6 +232,12 @@ export default function NewEventPage() {
 
     try {
       setLoading(true);
+
+      const cleanSchedule = removeEmptyScheduleRows(schedule);
+      const cleanProblems = removeEmptyProblemRows(problemStatements);
+      const cleanJudging = removeEmptyJudgingRows(judgingCriteria);
+      const cleanBenefits = removeEmptyStringRows(benefits);
+      const cleanRoles = removeEmptyStringRows(sampleRoles);
 
       const payload = {
         title: form.title.trim(),
@@ -219,9 +272,19 @@ export default function NewEventPage() {
         role_based_team: isTeamEvent ? form.role_based_team : false,
 
         rules_markdown: form.rules_markdown.trim() || null,
-        schedule_json: form.schedule_json.trim() || null,
-        problem_statements_json: form.problem_statements_json.trim() || null,
-        judging_json: form.judging_json.trim() || null,
+
+        schedule_json: cleanSchedule.length ? cleanSchedule : null,
+        problem_statements_json: cleanProblems.length ? cleanProblems : null,
+        judging_json: cleanJudging.length ? cleanJudging : null,
+
+        fee: form.fee.trim() || null,
+        prize_pool: form.prize_pool.trim() || null,
+        winner_prize: form.winner_prize.trim() || null,
+        runner_prize: form.runner_prize.trim() || null,
+
+        benefits_json: cleanBenefits.length ? cleanBenefits : null,
+        sample_roles_json:
+          isTeamEvent && cleanRoles.length ? cleanRoles : null,
       };
 
       const res = await fetch("/api/admin/events/create", {
@@ -250,8 +313,8 @@ export default function NewEventPage() {
       <div>
         <h1 className="text-2xl font-semibold text-foreground">Create Event</h1>
         <p className="text-sm text-foreground/60">
-          Configure a workshop, hackathon, or hybrid event with structured rules
-          and registration settings.
+          Configure a workshop, hackathon, or hybrid event with structured rules,
+          schedule, judging, pricing, and team settings.
         </p>
       </div>
 
@@ -483,66 +546,378 @@ export default function NewEventPage() {
           </section>
         )}
 
-        {isWorkshopLike && (
-          <section className={sectionClassName()}>
-            <h2 className="mb-4 text-lg font-semibold text-foreground">
-              Workshop content
-            </h2>
+        <section className={sectionClassName()}>
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold text-foreground">Schedule</h2>
+            <p className="mt-1 text-sm text-foreground/60">
+              Add the event flow using day, time, and session title.
+            </p>
+          </div>
 
-            <div className="space-y-4">
-              <textarea
-                className={textareaClassName()}
-                placeholder='Schedule JSON (example: [{"day":"Day 1","time":"9:30 AM","title":"Intro Session"}])'
-                rows={8}
-                value={form.schedule_json}
-                onChange={(e) => update("schedule_json", e.target.value)}
-              />
-            </div>
-          </section>
-        )}
+          <div className="space-y-3">
+            {schedule.map((item, index) => (
+              <div key={index} className={rowCardClassName()}>
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_1fr_2fr_auto]">
+                  <input
+                    className={inputClassName()}
+                    placeholder="Day"
+                    value={item.day}
+                    onChange={(e) => {
+                      const next = [...schedule];
+                      next[index] = { ...next[index], day: e.target.value };
+                      setSchedule(next);
+                    }}
+                  />
+
+                  <input
+                    className={inputClassName()}
+                    placeholder="Time"
+                    value={item.time}
+                    onChange={(e) => {
+                      const next = [...schedule];
+                      next[index] = { ...next[index], time: e.target.value };
+                      setSchedule(next);
+                    }}
+                  />
+
+                  <input
+                    className={inputClassName()}
+                    placeholder="Session title"
+                    value={item.title}
+                    onChange={(e) => {
+                      const next = [...schedule];
+                      next[index] = { ...next[index], title: e.target.value };
+                      setSchedule(next);
+                    }}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSchedule((prev) =>
+                        prev.length === 1
+                          ? [{ day: "", time: "", title: "" }]
+                          : prev.filter((_, i) => i !== index)
+                      )
+                    }
+                    className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={() =>
+                setSchedule((prev) => [
+                  ...prev,
+                  { day: "", time: "", title: "" },
+                ])
+              }
+              className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-foreground"
+            >
+              + Add schedule row
+            </button>
+          </div>
+        </section>
 
         {isHackathonLike && (
           <section className={sectionClassName()}>
-            <h2 className="mb-4 text-lg font-semibold text-foreground">
-              Hackathon content
-            </h2>
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold text-foreground">
+                Hackathon content
+              </h2>
+              <p className="mt-1 text-sm text-foreground/60">
+                Add rules, challenge statements, judging, pricing, and benefits.
+              </p>
+            </div>
 
-            <div className="space-y-4">
+            <div className="space-y-5">
               <textarea
                 className={textareaClassName()}
-                placeholder="Rules markdown"
+                placeholder="Rules markdown / plain text"
                 rows={6}
                 value={form.rules_markdown}
                 onChange={(e) => update("rules_markdown", e.target.value)}
               />
 
-              <textarea
-                className={textareaClassName()}
-                placeholder='Problem statements JSON (example: [{"title":"Water Access","difficulty":"Beginner","summary":"Build a solution..."}])'
-                rows={8}
-                value={form.problem_statements_json}
-                onChange={(e) =>
-                  update("problem_statements_json", e.target.value)
-                }
+              <div className="space-y-3">
+                <div>
+                  <h3 className="text-sm font-medium text-foreground">
+                    Problem statements
+                  </h3>
+                  <p className="mt-1 text-xs text-foreground/55">
+                    These will be saved in admin JSON format using title and summary.
+                  </p>
+                </div>
+
+                {problemStatements.map((item, index) => (
+                  <div key={index} className={rowCardClassName()}>
+                    <div className="space-y-3">
+                      <input
+                        className={inputClassName()}
+                        placeholder="Problem title"
+                        value={item.title}
+                        onChange={(e) => {
+                          const next = [...problemStatements];
+                          next[index] = { ...next[index], title: e.target.value };
+                          setProblemStatements(next);
+                        }}
+                      />
+
+                      <textarea
+                        className={textareaClassName()}
+                        placeholder="Problem summary"
+                        rows={4}
+                        value={item.summary}
+                        onChange={(e) => {
+                          const next = [...problemStatements];
+                          next[index] = {
+                            ...next[index],
+                            summary: e.target.value,
+                          };
+                          setProblemStatements(next);
+                        }}
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setProblemStatements((prev) =>
+                            prev.length === 1
+                              ? [{ title: "", summary: "" }]
+                              : prev.filter((_, i) => i !== index)
+                          )
+                        }
+                        className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setProblemStatements((prev) => [
+                      ...prev,
+                      { title: "", summary: "" },
+                    ])
+                  }
+                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-foreground"
+                >
+                  + Add problem statement
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <h3 className="text-sm font-medium text-foreground">
+                    Judging criteria
+                  </h3>
+                </div>
+
+                {judgingCriteria.map((item, index) => (
+                  <div key={index} className={rowCardClassName()}>
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-[2fr_1fr_auto]">
+                      <input
+                        className={inputClassName()}
+                        placeholder="Criterion"
+                        value={item.criterion}
+                        onChange={(e) => {
+                          const next = [...judgingCriteria];
+                          next[index] = {
+                            ...next[index],
+                            criterion: e.target.value,
+                          };
+                          setJudgingCriteria(next);
+                        }}
+                      />
+
+                      <input
+                        className={inputClassName()}
+                        placeholder="Weight"
+                        value={item.weight}
+                        onChange={(e) => {
+                          const next = [...judgingCriteria];
+                          next[index] = {
+                            ...next[index],
+                            weight: e.target.value,
+                          };
+                          setJudgingCriteria(next);
+                        }}
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setJudgingCriteria((prev) =>
+                            prev.length === 1
+                              ? [{ criterion: "", weight: "" }]
+                              : prev.filter((_, i) => i !== index)
+                          )
+                        }
+                        className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setJudgingCriteria((prev) => [
+                      ...prev,
+                      { criterion: "", weight: "" },
+                    ])
+                  }
+                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-foreground"
+                >
+                  + Add judging criterion
+                </button>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {(isWorkshopLike || isHackathonLike) && (
+          <section className={sectionClassName()}>
+            <h2 className="mb-4 text-lg font-semibold text-foreground">
+              Pricing and rewards
+            </h2>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <input
+                className={inputClassName()}
+                placeholder="Registration fee"
+                value={form.fee}
+                onChange={(e) => update("fee", e.target.value)}
               />
 
-              <textarea
-                className={textareaClassName()}
-                placeholder='Judging JSON (example: [{"criterion":"Impact","weight":"30%"}])'
-                rows={8}
-                value={form.judging_json}
-                onChange={(e) => update("judging_json", e.target.value)}
+              <input
+                className={inputClassName()}
+                placeholder="Prize pool"
+                value={form.prize_pool}
+                onChange={(e) => update("prize_pool", e.target.value)}
               />
 
-              {!isWorkshopLike && (
-                <textarea
-                  className={textareaClassName()}
-                  placeholder='Schedule JSON (example: [{"time":"10:00 AM","title":"Hackathon Kickoff"}])'
-                  rows={8}
-                  value={form.schedule_json}
-                  onChange={(e) => update("schedule_json", e.target.value)}
+              <input
+                className={inputClassName()}
+                placeholder="Winner prize"
+                value={form.winner_prize}
+                onChange={(e) => update("winner_prize", e.target.value)}
+              />
+
+              <input
+                className={inputClassName()}
+                placeholder="Runner prize"
+                value={form.runner_prize}
+                onChange={(e) => update("runner_prize", e.target.value)}
+              />
+            </div>
+          </section>
+        )}
+
+        <section className={sectionClassName()}>
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold text-foreground">Benefits</h2>
+            <p className="mt-1 text-sm text-foreground/60">
+              Add participant benefits like certificates, networking, mentorship, or swag.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            {benefits.map((item, index) => (
+              <div key={index} className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto]">
+                <input
+                  className={inputClassName()}
+                  placeholder="Benefit"
+                  value={item}
+                  onChange={(e) => {
+                    const next = [...benefits];
+                    next[index] = e.target.value;
+                    setBenefits(next);
+                  }}
                 />
-              )}
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setBenefits((prev) =>
+                      prev.length === 1 ? [""] : prev.filter((_, i) => i !== index)
+                    )
+                  }
+                  className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={() => setBenefits((prev) => [...prev, ""])}
+              className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-foreground"
+            >
+              + Add benefit
+            </button>
+          </div>
+        </section>
+
+        {isTeamEvent && (
+          <section className={sectionClassName()}>
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold text-foreground">
+                Sample team roles
+              </h2>
+              <p className="mt-1 text-sm text-foreground/60">
+                Add suggested roles for role-based or hackathon teams.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {sampleRoles.map((item, index) => (
+                <div
+                  key={index}
+                  className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto]"
+                >
+                  <input
+                    className={inputClassName()}
+                    placeholder="Role"
+                    value={item}
+                    onChange={(e) => {
+                      const next = [...sampleRoles];
+                      next[index] = e.target.value;
+                      setSampleRoles(next);
+                    }}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSampleRoles((prev) =>
+                        prev.length === 1 ? [""] : prev.filter((_, i) => i !== index)
+                      )
+                    }
+                    className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+
+              <button
+                type="button"
+                onClick={() => setSampleRoles((prev) => [...prev, ""])}
+                className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-foreground"
+              >
+                + Add role
+              </button>
             </div>
           </section>
         )}
