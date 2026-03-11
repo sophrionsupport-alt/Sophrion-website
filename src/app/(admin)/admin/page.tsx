@@ -10,6 +10,7 @@ import {
   Newspaper,
   ArrowRight,
   RefreshCw,
+  UserCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
@@ -95,8 +96,14 @@ const sectionLinks = [
   },
   {
     title: "Registrations",
-    description: "Review submissions, approvals, and exports.",
+    description: "Review submissions, approvals, exports, and ticket lifecycle.",
     href: "/admin/registrations",
+  },
+  {
+    title: "Volunteer scanner access",
+    description:
+      "Open an event and issue temporary scanner access codes for volunteers.",
+    href: "/admin/events",
   },
   {
     title: "Contacts",
@@ -174,6 +181,46 @@ function StatCard({
   );
 }
 
+function QuickLinkCard({
+  title,
+  description,
+  href,
+  icon: Icon,
+}: {
+  title: string;
+  description: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+}) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "group rounded-2xl border border-white/10 bg-card/90 p-4 transition backdrop-blur-sm",
+        "hover:border-white/15 hover:bg-white/5",
+        "shadow-[0_0_0_1px_hsl(var(--border)/0.35)]"
+      )}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-sm font-medium text-foreground">{title}</div>
+          <div className="mt-1 text-xs text-foreground/55">{description}</div>
+        </div>
+
+        <div
+          className={cn(
+            "grid h-10 w-10 shrink-0 place-items-center rounded-xl border text-foreground/75",
+            "border-white/10 bg-white/3",
+            "transition group-hover:border-white/15 group-hover:text-cyan-400"
+          )}
+        >
+          <Icon className="h-4.5 w-4.5" />
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 function SectionLink({
   title,
   description,
@@ -204,60 +251,61 @@ function SectionLink({
 
 export default function AdminHomePage() {
   const [stats, setStats] = React.useState<StatsState>({
-  events: { value: null, loading: true },
-  registrations: { value: null, loading: true },
-  contacts: { value: null, loading: true },
-  newsletter: { value: null, loading: true },
-  blog: { value: null, loading: true },
-  careers: { value: null, loading: true },
-  careerApplications: { value: null, loading: true },
-});
+    events: { value: null, loading: true },
+    registrations: { value: null, loading: true },
+    contacts: { value: null, loading: true },
+    newsletter: { value: null, loading: true },
+    blog: { value: null, loading: true },
+    careers: { value: null, loading: true },
+    careerApplications: { value: null, loading: true },
+  });
 
   const [refreshing, setRefreshing] = React.useState(false);
 
-const loadStats = React.useCallback(async () => {
-  setRefreshing(true);
+  const loadStats = React.useCallback(async () => {
+    setRefreshing(true);
 
-  setStats((s) => ({
-    events: { ...s.events, loading: true },
-    registrations: { ...s.registrations, loading: true },
-    contacts: { ...s.contacts, loading: true },
-    newsletter: { ...s.newsletter, loading: true },
-    blog: { ...s.blog, loading: true },
-    careers: { ...s.careers, loading: true },
-    careerApplications: { ...s.careerApplications, loading: true },
-  }));
+    setStats((s) => ({
+      events: { ...s.events, loading: true },
+      registrations: { ...s.registrations, loading: true },
+      contacts: { ...s.contacts, loading: true },
+      newsletter: { ...s.newsletter, loading: true },
+      blog: { ...s.blog, loading: true },
+      careers: { ...s.careers, loading: true },
+      careerApplications: { ...s.careerApplications, loading: true },
+    }));
 
-  const [
-    events,
-    registrations,
-    contacts,
-    newsletter,
-    blog,
-    careers,
-    careerApplications,
-  ] = await Promise.all([
-    safeCount("/api/admin/events"),
-    safeCount("/api/admin/registrations"),
-    safeCount("/api/admin/contacts"),
-    safeCount("/api/admin/newsletter"),
-    safeCount("/api/admin/blog"),
-    safeCount("/api/admin/careers"),
-    safeCount("/api/admin/career-applications"),
-  ]);
+    const [
+      events,
+      registrations,
+      contacts,
+      newsletter,
+      blog,
+      careers,
+      careerApplications,
+    ] = await Promise.all([
+      safeCount("/api/admin/events"),
+      safeCount("/api/admin/registrations"),
+      safeCount("/api/admin/contacts"),
+      safeCount("/api/admin/newsletter"),
+      safeCount("/api/admin/blog"),
+      safeCount("/api/admin/careers"),
+      safeCount("/api/admin/career-applications"),
+    ]);
 
-  setStats({
-    events: { value: events, loading: false },
-    registrations: { value: registrations, loading: false },
-    contacts: { value: contacts, loading: false },
-    newsletter: { value: newsletter, loading: false },
-    blog: { value: blog, loading: false },
-    careers: { value: careers, loading: false },
-    careerApplications: { value: careerApplications, loading: false },
-  });
+    setStats({
+      events: { value: events, loading: false },
+      registrations: { value: registrations, loading: false },
+      contacts: { value: contacts, loading: false },
+      newsletter: { value: newsletter, loading: false },
+      blog: { value: blog, loading: false },
+      careers: { value: careers, loading: false },
+      careerApplications: { value: careerApplications, loading: false },
+    });
 
-  setRefreshing(false);
-}, []);
+    setRefreshing(false);
+  }, []);
+
   React.useEffect(() => {
     loadStats();
   }, [loadStats]);
@@ -302,6 +350,22 @@ const loadStats = React.useCallback(async () => {
         ))}
       </div>
 
+      <div className="grid gap-3 lg:grid-cols-2">
+        <QuickLinkCard
+          title="Volunteer scanner access"
+          description="Create temporary codes and manage event-scoped scanning access."
+          href="/admin/events"
+          icon={UserCheck}
+        />
+
+        <QuickLinkCard
+          title="Ticket operations"
+          description="Use registrations and event flows to manage approvals, issuance, and check-in readiness."
+          href="/admin/registrations"
+          icon={CalendarDays}
+        />
+      </div>
+
       <div
         className={cn(
           "rounded-2xl border border-white/10 bg-card/90 p-5 backdrop-blur-sm",
@@ -318,7 +382,7 @@ const loadStats = React.useCallback(async () => {
         <div className="grid gap-3 lg:grid-cols-2">
           {sectionLinks.map((item) => (
             <SectionLink
-              key={item.href}
+              key={item.href + item.title}
               title={item.title}
               description={item.description}
               href={item.href}

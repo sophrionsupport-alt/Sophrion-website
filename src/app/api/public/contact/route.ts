@@ -3,7 +3,10 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { ok, fail } from "@/lib/utils/http";
 import { ContactSchema } from "@/lib/validators/contact";
 import { sendEmail } from "@/lib/email/send";
-import { contactAutoReplyEmail, contactInboxEmail } from "@/lib/email/templates";
+import {
+  contactAutoReplyEmail,
+  contactInboxEmail,
+} from "@/lib/email/templates";
 import { serverEnv } from "@/lib/env";
 
 export const runtime = "nodejs";
@@ -36,36 +39,40 @@ export async function POST(request: NextRequest) {
       .select("id, created_at")
       .single();
 
-    if (error) return fail(error.message, 500);
-if (!serverEnv) {
-  throw new Error("Server environment variables are not configured.");
-}
-    // Email to internal inbox
-    {
+    if (error) {
+      return fail(error.message, 500);
+    }
+
+    if (!serverEnv) {
+      throw new Error("Server environment variables are not configured.");
+    }
+
+    try {
       const built = contactInboxEmail(payload);
+
       await sendEmail({
         to: serverEnv.CONTACT_INBOX,
-        from: serverEnv.EMAIL_FROM_CONTACT,
         subject: built.subject,
         html: built.html,
         text: built.text,
-        replyTo: payload.email,
       });
+    } catch (mailError) {
+      console.error("[contact] inbox email failed:", mailError);
     }
 
-    // Auto-reply to user
-    {
+    try {
       const built = contactAutoReplyEmail(payload);
+
       await sendEmail({
         to: payload.email,
-        from: serverEnv.EMAIL_FROM_NOREPLY,
         subject: built.subject,
         html: built.html,
         text: built.text,
       });
+    } catch (mailError) {
+      console.error("[contact] auto-reply email failed:", mailError);
     }
 
-    // Keep response structure stable
     return ok({ ok: true, id: row.id });
   } catch (e: any) {
     return fail(e?.message ?? "Unexpected error", 500);

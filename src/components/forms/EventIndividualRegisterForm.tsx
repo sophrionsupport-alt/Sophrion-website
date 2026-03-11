@@ -7,7 +7,7 @@ import Button from "@/components/ui/Button";
 type ApiOk<T = unknown> = { ok: true; data?: T; message?: string };
 type ApiFail = {
   ok: false;
-  error?: string;
+  error?: string | { message?: string } | null;
   message?: string;
   fieldErrors?: Record<string, string>;
 };
@@ -27,7 +27,24 @@ function getErrMessage(payload: ApiResp | null | undefined) {
     return "Registration failed. Please try again.";
   }
 
-  return payload.error || payload.message || "Registration failed. Please try again.";
+  if (typeof payload.error === "string" && payload.error.trim()) {
+    return payload.error;
+  }
+
+  if (
+    payload.error &&
+    typeof payload.error === "object" &&
+    typeof payload.error.message === "string" &&
+    payload.error.message.trim()
+  ) {
+    return payload.error.message;
+  }
+
+  if (typeof payload.message === "string" && payload.message.trim()) {
+    return payload.message;
+  }
+
+  return "Registration failed. Please try again.";
 }
 
 export default function EventIndividualRegisterForm({
@@ -99,11 +116,18 @@ export default function EventIndividualRegisterForm({
       }
 
       setSuccessMsg(
-        "Registration submitted successfully. Please check your email for confirmation."
+        typeof data.message === "string" && data.message.trim()
+          ? data.message
+          : "Registration submitted successfully. Please check your email for confirmation."
       );
       resetForm();
-    } catch {
-      setErrorMsg("Network error. Please try again.");
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message.trim()
+          ? error.message
+          : "Network error. Please try again.";
+
+      setErrorMsg(message);
     } finally {
       setLoading(false);
     }

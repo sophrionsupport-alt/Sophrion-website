@@ -37,6 +37,9 @@ export default function EventsPage() {
   const [raw, setRaw] = React.useState<EventRecord[]>([]);
   const [rows, setRows] = React.useState<AdminRow[]>([]);
   const [actingId, setActingId] = React.useState<string | null>(null);
+  const [exportingEventId, setExportingEventId] = React.useState<string | null>(
+    null
+  );
 
   async function loadEvents() {
     try {
@@ -139,13 +142,58 @@ export default function EventsPage() {
     }
   }
 
+  async function exportEventRegistrations(eventId: string) {
+    try {
+      setExportingEventId(eventId);
+
+      const params = new URLSearchParams();
+      params.set("event_id", eventId);
+      params.set("sort", "newest");
+
+      const res = await fetch(
+        `/api/admin/registrations/export?${params.toString()}`,
+        {
+          method: "GET",
+        }
+      );
+
+      if (!res.ok) {
+        let message = "Failed to export event registrations";
+        try {
+          const json = await res.json();
+          message = json?.error || message;
+        } catch {}
+        alert(message);
+        return;
+      }
+
+      const blob = await res.blob();
+      const contentDisposition = res.headers.get("content-disposition") || "";
+      const match = contentDisposition.match(/filename="([^"]+)"/i);
+      const filename = match?.[1] || `event-registrations-${eventId}.csv`;
+
+      const url = window.URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error(error);
+      alert("Failed to export event registrations");
+    } finally {
+      setExportingEventId(null);
+    }
+  }
+
   React.useEffect(() => {
     loadEvents();
   }, [filters.q, filters.status, filters.sort]);
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <h1 className="text-2xl font-semibold text-foreground">Events</h1>
@@ -162,7 +210,6 @@ export default function EventsPage() {
         </Link>
       </div>
 
-      {/* Filters */}
       <FiltersBar
         value={filters}
         onChange={setFilters}
@@ -170,7 +217,6 @@ export default function EventsPage() {
         className="max-w-3xl"
       />
 
-      {/* Table */}
       <div className="rounded-xl border border-border bg-card">
         {loading ? (
           <div className="p-6 text-sm text-foreground/60">Loading events...</div>
@@ -188,16 +234,24 @@ export default function EventsPage() {
               if (!e) return null;
 
               const busy = actingId === e.id;
+              const exporting = exportingEventId === e.id;
 
               return (
                 <>
+                  <Link
+                    href={`/admin/events/${encodeURIComponent(e.id)}`}
+                    className="rounded-lg border border-border bg-background/40 px-3 py-1 text-xs hover:bg-background/60"
+                  >
+                    View
+                  </Link>
+
                   <a
                     href={`/events/${encodeURIComponent(e.slug)}`}
                     className="rounded-lg border border-border bg-background/40 px-3 py-1 text-xs hover:bg-background/60"
                     target="_blank"
                     rel="noreferrer"
                   >
-                    View
+                    Public View
                   </a>
 
                   <Link
@@ -208,6 +262,28 @@ export default function EventsPage() {
                   >
                     Registrations
                   </Link>
+
+                  <Link
+                    href={`/admin/events/${encodeURIComponent(e.id)}/scanner`}
+                    className="rounded-lg border border-border bg-background/40 px-3 py-1 text-xs hover:bg-background/60"
+                  >
+                    Scanner
+                  </Link>
+
+                  <Link
+                    href={`/admin/events/${encodeURIComponent(e.id)}/volunteers`}
+                    className="rounded-lg border border-border bg-background/40 px-3 py-1 text-xs hover:bg-background/60"
+                  >
+                    Volunteers
+                  </Link>
+
+                  <button
+                    onClick={() => exportEventRegistrations(e.id)}
+                    disabled={exporting}
+                    className="rounded-lg border border-border bg-background/40 px-3 py-1 text-xs hover:bg-background/60 disabled:opacity-50"
+                  >
+                    {exporting ? "Exporting…" : "Export CSV"}
+                  </button>
 
                   <button
                     className="rounded-lg border border-border bg-background/40 px-3 py-1 text-xs hover:bg-background/60 disabled:opacity-50"

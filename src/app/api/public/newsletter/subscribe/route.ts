@@ -40,18 +40,22 @@ export async function POST(request: NextRequest) {
 
     if (error) return fail(error.message, 500);
 
-    // Send welcome email
-    const built = newsletterWelcomeEmail(payload);
-if (!serverEnv) {
-  throw new Error("Server environment variables are not configured.");
-}
-    await sendEmail({
-      to: payload.email,
-      from: serverEnv.EMAIL_FROM_NOREPLY,
-      subject: built.subject,
-      html: built.html,
-      text: built.text,
-    });
+    if (!serverEnv) {
+      throw new Error("Server environment variables are not configured.");
+    }
+
+    try {
+      const built = newsletterWelcomeEmail(payload);
+
+      await sendEmail({
+        to: payload.email,
+        subject: built.subject,
+        html: built.html,
+        text: built.text,
+      });
+    } catch (mailError) {
+      console.error("[newsletter] welcome email failed:", mailError);
+    }
 
     return ok({
       ok: true,

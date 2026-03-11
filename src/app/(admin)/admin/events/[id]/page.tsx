@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
+import { toIST } from "@/lib/utils/dates";
 
 type EventType = "workshop" | "hackathon" | "hybrid";
 type RegistrationType = "individual" | "team";
@@ -482,8 +483,7 @@ export default function AdminEventEditPage() {
         runner_prize: form.runner_prize.trim() || null,
 
         benefits_json: cleanBenefits.length ? cleanBenefits : null,
-        sample_roles_json:
-          isTeamEvent && cleanRoles.length ? cleanRoles : null,
+        sample_roles_json: isTeamEvent && cleanRoles.length ? cleanRoles : null,
       };
 
       const res = await fetch(`/api/admin/events/${encodeURIComponent(id)}`, {
@@ -632,6 +632,36 @@ export default function AdminEventEditPage() {
             onClick={() => router.push("/admin/events")}
           >
             Back
+          </button>
+
+          <button
+            className="rounded-xl border border-border bg-background/40 px-4 py-2 text-xs hover:bg-background/60 disabled:opacity-50"
+            disabled={loading || deletingRegistrations}
+            onClick={() =>
+              router.push(`/admin/registrations?event_id=${encodeURIComponent(id)}`)
+            }
+          >
+            Registrations
+          </button>
+
+          <button
+            className="rounded-xl border border-border bg-background/40 px-4 py-2 text-xs hover:bg-background/60 disabled:opacity-50"
+            disabled={loading || deletingRegistrations}
+            onClick={() =>
+              router.push(`/admin/events/${encodeURIComponent(id)}/scanner`)
+            }
+          >
+            Scanner
+          </button>
+
+          <button
+            className="rounded-xl border border-border bg-background/40 px-4 py-2 text-xs hover:bg-background/60 disabled:opacity-50"
+            disabled={loading || deletingRegistrations}
+            onClick={() =>
+              router.push(`/admin/events/${encodeURIComponent(id)}/volunteers`)
+            }
+          >
+            Manage Volunteers
           </button>
 
           <a
@@ -1323,9 +1353,7 @@ export default function AdminEventEditPage() {
                   Team Size: {form.min_team_size} - {form.max_team_size}
                 </div>
               ) : null}
-              {event.updated_at ? (
-                <div>Updated: {new Date(event.updated_at).toLocaleString()}</div>
-              ) : null}
+              {event.updated_at ? <div>Updated: {toIST(event.updated_at)}</div> : null}
             </div>
 
             <section className="space-y-4 rounded-2xl border border-red-500/20 bg-red-500/5 p-5">

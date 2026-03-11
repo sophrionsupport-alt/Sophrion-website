@@ -29,11 +29,18 @@ export type EventListItem = {
 
   start_at?: string | null;
   end_at?: string | null;
+  reporting_time?: string | null;
 
   mode?: "online" | "offline" | "hybrid" | string | null;
   venue?: string | null;
   city?: string | null;
   state?: string | null;
+  map_url?: string | null;
+
+  contact_person_name?: string | null;
+  contact_person_email?: string | null;
+  contact_person_phone?: string | null;
+  entry_instructions?: string | null;
 
   banner_url?: string | null;
 
@@ -55,10 +62,10 @@ export type EventListItem = {
   problem_statements_json?: ProblemStatement[] | null;
   judging_json?: JudgingCriteria[] | null;
 
-  entry_fee?: number | null;
-  prize_first?: number | null;
-  prize_second?: number | null;
-  prize_third?: number | null;
+  fee?: string | null;
+  prize_pool?: string | null;
+  winner_prize?: string | null;
+  runner_prize?: string | null;
 
   benefits_json?: string[] | null;
   sample_roles_json?: string[] | null;

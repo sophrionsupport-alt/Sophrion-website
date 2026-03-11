@@ -1,4 +1,3 @@
-// src/components/forms/CareerApplyForm.tsx
 "use client";
 
 import * as React from "react";
@@ -154,7 +153,10 @@ export default function CareerApplyForm({
       </div>
 
       {error ? (
-        <div className="mt-6 rounded-xl border border-rose-400/20 bg-rose-400/10 px-4 py-3 text-sm text-rose-200">
+        <div
+          className="mt-6 rounded-xl border border-rose-400/20 bg-rose-400/10 px-4 py-3 text-sm text-rose-200"
+          role="alert"
+        >
           {error}
         </div>
       ) : null}
@@ -167,6 +169,9 @@ export default function CareerApplyForm({
             </FieldLabel>
             <input
               id="full_name"
+              name="full_name"
+              type="text"
+              autoComplete="name"
               value={form.full_name}
               onChange={(e) => update("full_name", e.target.value)}
               className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 text-sm text-white outline-none placeholder:text-white/35 focus:border-cyan-400/30"
@@ -181,7 +186,9 @@ export default function CareerApplyForm({
             </FieldLabel>
             <input
               id="email"
+              name="email"
               type="email"
+              autoComplete="email"
               value={form.email}
               onChange={(e) => update("email", e.target.value)}
               className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 text-sm text-white outline-none placeholder:text-white/35 focus:border-cyan-400/30"
@@ -194,6 +201,9 @@ export default function CareerApplyForm({
             <FieldLabel htmlFor="phone">Phone</FieldLabel>
             <input
               id="phone"
+              name="phone"
+              type="tel"
+              autoComplete="tel"
               value={form.phone}
               onChange={(e) => update("phone", e.target.value)}
               className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 text-sm text-white outline-none placeholder:text-white/35 focus:border-cyan-400/30"
@@ -205,6 +215,9 @@ export default function CareerApplyForm({
             <FieldLabel htmlFor="college">College / Institution</FieldLabel>
             <input
               id="college"
+              name="college"
+              type="text"
+              autoComplete="organization"
               value={form.college}
               onChange={(e) => update("college", e.target.value)}
               className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 text-sm text-white outline-none placeholder:text-white/35 focus:border-cyan-400/30"
@@ -216,6 +229,9 @@ export default function CareerApplyForm({
             <FieldLabel htmlFor="degree">Degree / Program</FieldLabel>
             <input
               id="degree"
+              name="degree"
+              type="text"
+              autoComplete="organization-title"
               value={form.degree}
               onChange={(e) => update("degree", e.target.value)}
               className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 text-sm text-white outline-none placeholder:text-white/35 focus:border-cyan-400/30"
@@ -227,6 +243,10 @@ export default function CareerApplyForm({
             <FieldLabel htmlFor="graduation_year">Graduation year</FieldLabel>
             <input
               id="graduation_year"
+              name="graduation_year"
+              type="text"
+              inputMode="numeric"
+              autoComplete="off"
               value={form.graduation_year}
               onChange={(e) => update("graduation_year", e.target.value)}
               className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 text-sm text-white outline-none placeholder:text-white/35 focus:border-cyan-400/30"
@@ -238,7 +258,9 @@ export default function CareerApplyForm({
             <FieldLabel htmlFor="linkedin_url">LinkedIn URL</FieldLabel>
             <input
               id="linkedin_url"
+              name="linkedin_url"
               type="url"
+              autoComplete="url"
               value={form.linkedin_url}
               onChange={(e) => update("linkedin_url", e.target.value)}
               className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 text-sm text-white outline-none placeholder:text-white/35 focus:border-cyan-400/30"
@@ -250,7 +272,9 @@ export default function CareerApplyForm({
             <FieldLabel htmlFor="portfolio_url">Portfolio URL</FieldLabel>
             <input
               id="portfolio_url"
+              name="portfolio_url"
               type="url"
+              autoComplete="url"
               value={form.portfolio_url}
               onChange={(e) => update("portfolio_url", e.target.value)}
               className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 text-sm text-white outline-none placeholder:text-white/35 focus:border-cyan-400/30"
@@ -265,6 +289,8 @@ export default function CareerApplyForm({
           </FieldLabel>
           <textarea
             id="why_join"
+            name="why_join"
+            autoComplete="off"
             value={form.why_join}
             onChange={(e) => update("why_join", e.target.value)}
             rows={6}
@@ -275,9 +301,13 @@ export default function CareerApplyForm({
         </div>
 
         <div>
-          <FieldLabel htmlFor="cover_letter">Anything else we should know?</FieldLabel>
+          <FieldLabel htmlFor="cover_letter">
+            Anything else we should know?
+          </FieldLabel>
           <textarea
             id="cover_letter"
+            name="cover_letter"
+            autoComplete="off"
             value={form.cover_letter}
             onChange={(e) => update("cover_letter", e.target.value)}
             rows={5}

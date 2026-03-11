@@ -171,21 +171,33 @@ function buildAdminNotificationEmail(input: {
 
 export async function POST(req: Request) {
   try {
+    console.log("[careers/apply] POST hit");
+
     const body = await req.json();
+    console.log("[careers/apply] raw body:", body);
+
     const parsed = CareerApplySchema.safeParse(body);
 
     if (!parsed.success) {
+      console.error(
+        "[careers/apply] validation failed:",
+        parsed.error.flatten()
+      );
       const firstIssue = parsed.error.issues[0];
       return json(false, { error: firstIssue?.message || "Invalid input" }, 400);
     }
 
     const payload = parsed.data;
+    console.log("[careers/apply] parsed payload:", payload);
+
     const supabase = supabaseAdmin();
 
     let roleId: string | null = payload.role_id ?? null;
     let roleTitleSnapshot: string | null = payload.role_title_snapshot ?? null;
 
     if (roleId) {
+      console.log("[careers/apply] validating role:", roleId);
+
       const { data: role, error: roleError } = await supabase
         .from("career_roles")
         .select("id,title,is_published")
@@ -193,15 +205,17 @@ export async function POST(req: Request) {
         .maybeSingle();
 
       if (roleError) {
-        console.error("Career role lookup failed:", roleError);
+        console.error("[careers/apply] career role lookup failed:", roleError);
         return json(false, { error: "Failed to validate selected role" }, 500);
       }
 
       if (!role || !role.is_published) {
+        console.error("[careers/apply] selected role unavailable:", role);
         return json(false, { error: "Selected role is unavailable" }, 400);
       }
 
       roleTitleSnapshot = role.title;
+      console.log("[careers/apply] role validated:", roleTitleSnapshot);
     }
 
     const insertPayload = {
@@ -220,6 +234,8 @@ export async function POST(req: Request) {
       source: payload.source || "careers_site",
     };
 
+    console.log("[careers/apply] insert payload:", insertPayload);
+
     const { data, error } = await supabase
       .from("career_applications")
       .insert(insertPayload)
@@ -227,9 +243,11 @@ export async function POST(req: Request) {
       .single();
 
     if (error) {
-      console.error("Career application insert failed:", error);
+      console.error("[careers/apply] career application insert failed:", error);
       return json(false, { error: "Failed to submit application" }, 500);
     }
+
+    console.log("[careers/apply] insert success:", data);
 
     try {
       const applicantMail = buildCareerAcknowledgementEmail({
@@ -237,14 +255,21 @@ export async function POST(req: Request) {
         roleTitle: roleTitleSnapshot,
       });
 
-      await sendEmail({
+      console.log("[careers/apply] sending applicant email to:", payload.email);
+
+      const applicantMailResult = await sendEmail({
         to: payload.email,
         subject: applicantMail.subject,
         html: applicantMail.html,
         text: applicantMail.text,
       });
+
+      console.log(
+        "[careers/apply] applicant email success:",
+        applicantMailResult
+      );
     } catch (mailError) {
-      console.error("Career acknowledgement email failed:", mailError);
+      console.error("[careers/apply] applicant email failed:", mailError);
     }
 
     try {
@@ -252,6 +277,8 @@ export async function POST(req: Request) {
         process.env.CAREERS_ADMIN_EMAIL?.split(",")
           .map((email) => email.trim())
           .filter(Boolean) ?? [];
+
+      console.log("[careers/apply] admin email targets:", adminEmails);
 
       if (adminEmails.length > 0) {
         const adminMail = buildAdminNotificationEmail({
@@ -264,15 +291,24 @@ export async function POST(req: Request) {
           linkedin: payload.linkedin_url,
         });
 
-        await sendEmail({
+        const adminMailResult = await sendEmail({
           to: adminEmails,
           subject: adminMail.subject,
           html: adminMail.html,
           text: adminMail.text,
         });
+
+        console.log("[careers/apply] admin email success:", adminMailResult);
+      } else {
+        console.log(
+          "[careers/apply] admin email skipped: CAREERS_ADMIN_EMAIL not set"
+        );
       }
     } catch (adminMailError) {
-      console.error("Admin notification email failed:", adminMailError);
+      console.error(
+        "[careers/apply] admin notification email failed:",
+        adminMailError
+      );
     }
 
     return json(
@@ -285,7 +321,7 @@ export async function POST(req: Request) {
       201
     );
   } catch (error) {
-    console.error("Public careers apply API error:", error);
+    console.error("[careers/apply] public careers apply API error:", error);
     return json(false, { error: "Something went wrong" }, 500);
   }
 }
