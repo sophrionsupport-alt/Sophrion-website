@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/requireAdmin";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createVolunteerAccess } from "@/lib/scanner/createVolunteerAccess";
+import { sendMail } from "@/lib/email/sendMail";
+import { volunteerInviteEmail } from "@/lib/email/templates/volunteerInvite";
+import { getAppConfig } from "@/lib/env";
 
 export const runtime = "nodejs";
 
@@ -104,6 +107,18 @@ export async function POST(
       return fail("Expiry is required.", 400);
     }
 
+    const supabase = createSupabaseAdminClient();
+
+    const { data: eventRow, error: eventError } = await supabase
+      .from("events")
+      .select("id, title")
+      .eq("id", eventId)
+      .single();
+
+    if (eventError || !eventRow) {
+      return fail("Event not found.", 404);
+    }
+
     const created = await createVolunteerAccess({
       eventId,
       fullName,
@@ -111,12 +126,49 @@ export async function POST(
       expiresAt,
     });
 
+    let emailWarning: string | null = null;
+
+    try {
+      const appConfig = getAppConfig();
+
+      const volunteerId = created.volunteer.id;
+      const eventTitle = eventRow.title || "Sophrion Event";
+
+      const accessUrl = `${appConfig.canonicalDomain}/volunteer/login`;
+
+      const emailContent = volunteerInviteEmail({
+        name: created.volunteer.full_name || fullName,
+        eventTitle,
+        eventId,
+        volunteerId,
+        tempCode: created.tempCode,
+        accessUrl,
+        expiresAt,
+      });
+
+      await sendMail({
+        to: [{ address: email, name: fullName }],
+        subject: emailContent.subject,
+        html: emailContent.html,
+      });
+    } catch (mailError) {
+      console.error("Volunteer invite email failed", mailError);
+      emailWarning =
+        mailError instanceof Error
+          ? mailError.message
+          : "Volunteer created but email sending failed.";
+    }
+
     return ok(
       {
         volunteer: created.volunteer,
         tempCode: created.tempCode,
+        emailSent: !emailWarning,
+        emailWarning,
       },
-      "Volunteer access created.",
+      emailWarning
+        ? "Volunteer access created, but email could not be sent."
+        : "Volunteer access created and email sent.",
       201
     );
   } catch (error) {
