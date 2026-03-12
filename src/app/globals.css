@@ -63,3 +63,67 @@
     transform: translateX(60%);
   }
 }
+.scan-line {
+  width: 88%;
+  height: 4px;
+  margin-top: 12px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(34, 211, 238, 0.15) 10%,
+    rgba(34, 211, 238, 0.95) 35%,
+    rgba(168, 85, 247, 1) 50%,
+    rgba(34, 211, 238, 0.95) 65%,
+    rgba(34, 211, 238, 0.15) 90%,
+    transparent 100%
+  );
+  box-shadow:
+    0 0 10px rgba(34, 211, 238, 0.8),
+    0 0 24px rgba(34, 211, 238, 0.45),
+    0 0 40px rgba(168, 85, 247, 0.3);
+  animation: sophrion-scan-line 2s linear infinite;
+}
+
+@keyframes sophrion-scan-line {
+  0% {
+    transform: translateY(8px);
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(250px);
+    opacity: 0.9;
+  }
+}
+
+.scanner-shell {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    radial-gradient(circle at top, rgba(34, 211, 238, 0.08), transparent 35%),
+    radial-gradient(circle at bottom, rgba(168, 85, 247, 0.08), transparent 35%),
+    #000;
+}
+
+.scanner-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: linear-gradient(to bottom, transparent, rgba(0,0,0,0.9), transparent);
+  pointer-events: none;
+}
+
+.scanner-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, transparent 45%, rgba(0,0,0,0.42) 100%);
+  pointer-events: none;
+}

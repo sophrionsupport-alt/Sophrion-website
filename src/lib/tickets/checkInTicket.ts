@@ -274,7 +274,10 @@ export async function checkInTicket(input: CheckInInput) {
     };
   }
 
-  if (ticket.status === "checked_in") {
+  const hasCompletedCheckIn =
+    ticket.status === "used" && Boolean(ticket.checked_in_at);
+
+  if (hasCompletedCheckIn) {
     const checkedInByMeta = await getScannerAccessMeta(ticket.checked_in_by);
 
     await insertScanLog({
@@ -398,7 +401,10 @@ export async function checkInTicket(input: CheckInInput) {
     };
   }
 
-  if (ticket.status !== "active") {
+  const isRecoverableBrokenCheckedInState =
+    ticket.status === "used" && !ticket.checked_in_at;
+
+  if (ticket.status !== "active" && !isRecoverableBrokenCheckedInState) {
     await insertScanLog({
       ticketId: ticket.id,
       eventId: ticket.event_id,
@@ -463,83 +469,110 @@ export async function checkInTicket(input: CheckInInput) {
 
   const checkedInAt = nowIso();
 
-  const { data: updatedTicket, error: updateError } = await supabase
+  const updateQuery = supabase
     .from("event_tickets")
     .update({
-      status: "checked_in",
+      status: "used",
       checked_in_at: checkedInAt,
       checked_in_by: input.scannedBy ?? null,
       updated_at: checkedInAt,
     })
-    .eq("id", ticket.id)
-    .eq("status", "active")
+    .eq("id", ticket.id);
+
+  if (isRecoverableBrokenCheckedInState) {
+    updateQuery.is("checked_in_at", null);
+  } else {
+    updateQuery.eq("status", "active");
+  }
+
+  const { data: updatedTicket, error: updateError } = await updateQuery
     .select("*")
     .single();
 
   if (updateError || !updatedTicket) {
-    const { data: latestTicket } = await supabase
+    console.error("ticket check-in update failed", {
+      ticketId: ticket.id,
+      updateError,
+    });
+
+    const { data: latestTicket, error: latestTicketError } = await supabase
       .from("event_tickets")
       .select("*")
       .eq("id", ticket.id)
       .single();
 
-    const checkedInByMeta = await getScannerAccessMeta(
-      latestTicket?.checked_in_by ?? null
-    );
-
-    await insertScanLog({
+    console.error("check-in latest row after update failure", {
       ticketId: ticket.id,
-      eventId: ticket.event_id,
-      scannedBy: input.scannedBy ?? null,
-      scanResult: "already_used",
-      source: input.source,
-      payload: {
-        reason: "concurrent_check_in",
-        checked_in_at: latestTicket?.checked_in_at ?? null,
-        checked_in_by: latestTicket?.checked_in_by ?? null,
-        checked_in_by_name: checkedInByMeta?.full_name ?? null,
-        checked_in_by_email: checkedInByMeta?.email ?? null,
-      },
-      device: input.device,
-      ip: input.ip,
-      userAgent: input.userAgent,
+      latestTicket,
+      latestTicketError,
+      updateError,
     });
 
-    await insertAuditLog({
-      ticketId: ticket.id,
-      registrationId: ticket.registration_id,
-      eventId: ticket.event_id,
-      actorId: input.scannedBy ?? null,
-      action: "scan_attempt",
-      meta: {
-        result: "already_used",
-        reason: "concurrent_check_in",
-        checked_in_at: latestTicket?.checked_in_at ?? null,
-        checked_in_by: latestTicket?.checked_in_by ?? null,
-        checked_in_by_name: checkedInByMeta?.full_name ?? null,
-        checked_in_by_email: checkedInByMeta?.email ?? null,
-      },
-    });
+    if (latestTicket && latestTicket.status === "used" && latestTicket.checked_in_at) {
+      const checkedInByMeta = await getScannerAccessMeta(
+        latestTicket.checked_in_by ?? null
+      );
 
-    const { data: event } = await supabase
-      .from("events")
-      .select("id, title, slug")
-      .eq("id", ticket.event_id)
-      .single();
+      await insertScanLog({
+        ticketId: ticket.id,
+        eventId: ticket.event_id,
+        scannedBy: input.scannedBy ?? null,
+        scanResult: "already_used",
+        source: input.source,
+        payload: {
+          reason: "concurrent_check_in",
+          checked_in_at: latestTicket.checked_in_at ?? null,
+          checked_in_by: latestTicket.checked_in_by ?? null,
+          checked_in_by_name: checkedInByMeta?.full_name ?? null,
+          checked_in_by_email: checkedInByMeta?.email ?? null,
+        },
+        device: input.device,
+        ip: input.ip,
+        userAgent: input.userAgent,
+      });
+
+      await insertAuditLog({
+        ticketId: ticket.id,
+        registrationId: ticket.registration_id,
+        eventId: ticket.event_id,
+        actorId: input.scannedBy ?? null,
+        action: "scan_attempt",
+        meta: {
+          result: "already_used",
+          reason: "concurrent_check_in",
+          checked_in_at: latestTicket.checked_in_at ?? null,
+          checked_in_by: latestTicket.checked_in_by ?? null,
+          checked_in_by_name: checkedInByMeta?.full_name ?? null,
+          checked_in_by_email: checkedInByMeta?.email ?? null,
+        },
+      });
+
+      const { data: event } = await supabase
+        .from("events")
+        .select("id, title, slug")
+        .eq("id", ticket.event_id)
+        .single();
+
+      return {
+        ok: false as const,
+        result: "already_used" as const,
+        message: "Ticket was already checked in.",
+        ticket: latestTicket,
+        event: event ?? null,
+        registration,
+        checkedInMeta: {
+          checked_in_at: latestTicket.checked_in_at ?? null,
+          checked_in_by: latestTicket.checked_in_by ?? null,
+          checked_in_by_name: checkedInByMeta?.full_name ?? null,
+          checked_in_by_email: checkedInByMeta?.email ?? null,
+        },
+      };
+    }
 
     return {
       ok: false as const,
-      result: "already_used" as const,
-      message: "Ticket was already checked in.",
-      ticket: latestTicket ?? ticket,
-      event: event ?? null,
-      registration,
-      checkedInMeta: {
-        checked_in_at: latestTicket?.checked_in_at ?? null,
-        checked_in_by: latestTicket?.checked_in_by ?? null,
-        checked_in_by_name: checkedInByMeta?.full_name ?? null,
-        checked_in_by_email: checkedInByMeta?.email ?? null,
-      },
+      result: "invalid" as const,
+      message: "Unable to complete check-in. Please try again.",
     };
   }
 
