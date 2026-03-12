@@ -170,6 +170,8 @@ export default function VolunteerScannerPage() {
 
   const checkedInAt = result?.checkedInMeta?.checked_in_at
     ? toIST(result.checkedInMeta.checked_in_at)
+    : result?.ticket?.checked_in_at
+    ? toIST(result.ticket.checked_in_at)
     : null;
 
   const checkedInBy =
@@ -244,9 +246,9 @@ export default function VolunteerScannerPage() {
             </div>
           )}
 
-          {result.result === "already_used" && (
+          {checkedInAt && (
             <div className="mt-3 space-y-1 text-sm text-foreground/80">
-              {checkedInAt && <div>Checked in at: {checkedInAt}</div>}
+              <div>Checked in at: {checkedInAt}</div>
               {checkedInBy && <div>Checked in by: {checkedInBy}</div>}
             </div>
           )}
