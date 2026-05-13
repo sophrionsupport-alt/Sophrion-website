@@ -26,10 +26,10 @@ function CtaButton({
     <Link
       href={href}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         variant === "primary"
-          ? "text-white shadow-[0_10px_30px_-12px_hsl(var(--cyan-500)/0.45)] hover:opacity-95"
-          : "border border-white/10 bg-white/3 text-foreground/85 backdrop-blur-sm hover:border-white/15 hover:bg-white/5 hover:text-foreground",
+          ? "text-white shadow-[0_10px_30px_-12px_hsl(var(--cyan-500)/0.45)] hover:scale-[1.03] hover:shadow-[0_0_24px_-4px_hsl(var(--cyan-500)/0.45),0_0_12px_-2px_hsl(var(--brand-600)/0.3)]"
+          : "border border-white/10 bg-white/[0.03] text-foreground/85 backdrop-blur-sm hover:border-white/[0.15] hover:bg-white/[0.05] hover:text-foreground hover:scale-[1.02]",
         className
       )}
       style={
@@ -41,8 +41,16 @@ function CtaButton({
           : undefined
       }
     >
-      {children}
-      <ArrowRight className="h-4 w-4" />
+      <span className="relative z-10 inline-flex items-center gap-2">
+        {children}
+        <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+      </span>
+      {variant === "primary" && (
+        <span
+          aria-hidden="true"
+          className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/[0.12] to-transparent transition-transform duration-700 group-hover:translate-x-full"
+        />
+      )}
     </Link>
   );
 }
@@ -258,22 +266,29 @@ export default function HomeMarketing() {
             align="center"
           />
           <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {modelPhases.map((p, i) => (
-              <motion.div
-                key={p.title}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
-                className="rounded-2xl border border-border bg-card/70 p-5"
-              >
-                <p className="text-xs font-semibold uppercase tracking-widest text-foreground/50">
-                  Phase {i + 1}
-                </p>
-                <h3 className="mt-2 text-lg font-semibold text-foreground">{p.title}</h3>
-                <p className="mt-2 text-sm text-foreground/70">{p.body}</p>
-              </motion.div>
-            ))}
+            {modelPhases.map((p, i) => {
+              const glowClass = ["glow-purple", "glow-cyan", "glow-blue", "glow-indigo", "glow-purple"][i];
+              return (
+                <motion.div
+                  key={p.title}
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.05 }}
+                  className={cn(
+                    "rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5 backdrop-blur-lg",
+                    "transition-all duration-300 hover:border-white/[0.14] shimmer-border",
+                    glowClass
+                  )}
+                >
+                  <p className="text-xs font-semibold uppercase tracking-widest text-foreground/50">
+                    Phase {i + 1}
+                  </p>
+                  <h3 className="mt-2 text-lg font-semibold text-foreground">{p.title}</h3>
+                  <p className="mt-2 text-sm text-foreground/70">{p.body}</p>
+                </motion.div>
+              );
+            })}
           </div>
           <div className="mt-8 flex justify-center">
             <CtaButton href={MARKETING.ecosystem} variant="secondary">

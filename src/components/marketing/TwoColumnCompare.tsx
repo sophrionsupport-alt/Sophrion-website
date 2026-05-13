@@ -29,12 +29,15 @@ export default function TwoColumnCompare({
         whileInView={{ opacity: 1, x: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
-        className="rounded-2xl border border-white/10 bg-white/3 p-6 backdrop-blur"
+        className="relative rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 backdrop-blur-lg transition-all duration-300 hover:border-white/[0.12] glow-indigo"
       >
         <h3 className="text-lg font-semibold text-foreground">{leftTitle}</h3>
-        <ul className="mt-4 space-y-2 text-sm text-foreground/75">
+        <ul className="mt-4 space-y-2.5 text-sm text-foreground/75">
           {leftItems.map((t) => (
-            <li key={t}>• {t}</li>
+            <li key={t} className="flex items-start gap-2">
+              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground/30" />
+              {t}
+            </li>
           ))}
         </ul>
       </motion.div>
@@ -43,12 +46,15 @@ export default function TwoColumnCompare({
         whileInView={{ opacity: 1, x: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
-        className="rounded-2xl border border-[hsl(var(--cyan-500)/0.25)] bg-[hsl(var(--brand-600)/0.08)] p-6 backdrop-blur"
+        className="relative rounded-2xl border border-[hsl(var(--cyan-500)/0.2)] bg-[hsl(var(--brand-600)/0.06)] p-6 backdrop-blur-lg transition-all duration-300 hover:border-[hsl(var(--cyan-500)/0.3)] glow-cyan shimmer-border"
       >
         <h3 className="text-lg font-semibold text-foreground">{rightTitle}</h3>
-        <ul className="mt-4 space-y-2 text-sm text-foreground/80">
+        <ul className="mt-4 space-y-2.5 text-sm text-foreground/80">
           {rightItems.map((t) => (
-            <li key={t}>• {t}</li>
+            <li key={t} className="flex items-start gap-2">
+              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[hsl(var(--cyan-500)/0.6)]" />
+              {t}
+            </li>
           ))}
         </ul>
       </motion.div>

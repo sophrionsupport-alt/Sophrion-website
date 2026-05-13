@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import SiteHeader from "@/components/layout/SiteHeader";
 import SiteFooter from "@/components/layout/SiteFooter";
 import FooterCtaStrip from "@/components/layout/FooterCtaStrip";
+import AnimatedBackground from "@/components/ui/AnimatedBackground";
 
 const SITE_NAME = "Sophrion";
 const SITE_URL = "https://sophrion.in";
@@ -68,15 +69,7 @@ export const metadata: Metadata = {
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-0 -z-10 opacity-70"
-        style={{
-          background:
-            "radial-gradient(900px circle at 20% 10%, hsl(var(--ring) / 0.18), transparent 55%)," +
-            "radial-gradient(900px circle at 80% 35%, hsl(var(--cyan-500) / 0.14), transparent 55%)",
-        }}
-      />
+      <AnimatedBackground />
 
       <SiteHeader />
       <main className="mx-auto w-full flex-1">{children}</main>

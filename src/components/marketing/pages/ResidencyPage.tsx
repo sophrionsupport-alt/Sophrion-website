@@ -15,13 +15,23 @@ function Cta({ href, children, primary = true }: { href: string; children: React
     <Link
       href={href}
       className={cn(
-        "inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition",
-        primary ? "text-white hover:opacity-95" : "border border-white/10 bg-white/3 text-foreground/85"
+        "group relative inline-flex items-center gap-2 overflow-hidden rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-300",
+        primary
+          ? "text-white shadow-[0_10px_30px_-12px_hsl(var(--cyan-500)/0.45)] hover:scale-[1.03] hover:shadow-[0_0_24px_-4px_hsl(var(--cyan-500)/0.45),0_0_12px_-2px_hsl(var(--brand-600)/0.3)]"
+          : "border border-white/10 bg-white/[0.03] text-foreground/85 backdrop-blur-sm hover:border-white/[0.15] hover:bg-white/[0.05] hover:text-foreground hover:scale-[1.02]"
       )}
       style={primary ? { background: "linear-gradient(90deg, hsl(var(--brand-600)), hsl(var(--cyan-500)))" } : undefined}
     >
-      {children}
-      <ArrowRight className="h-4 w-4" />
+      <span className="relative z-10 inline-flex items-center gap-2">
+        {children}
+        <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+      </span>
+      {primary && (
+        <span
+          aria-hidden="true"
+          className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/[0.12] to-transparent transition-transform duration-700 group-hover:translate-x-full"
+        />
+      )}
     </Link>
   );
 }
@@ -136,8 +146,15 @@ export default function ResidencyPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <MarketingSectionHeader eyebrow="COLLABORATIVE SYSTEMS" title="Squad-Based Execution Ecosystem" subtitle="Students work in interdisciplinary squads designed to simulate real operational environments and collaborative product systems. Ideal squad size: 5–8 students per squad." />
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {squadRoles.map((r) => (
-              <div key={r.role} className="rounded-2xl border border-border bg-card/70 p-5">
+            {squadRoles.map((r, i) => (
+              <div
+                key={r.role}
+                className={cn(
+                  "rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5 backdrop-blur-lg",
+                  "transition-all duration-300 hover:border-white/[0.14] shimmer-border",
+                  ["glow-purple", "glow-cyan", "glow-blue", "glow-indigo", "glow-purple", "glow-cyan"][i]
+                )}
+              >
                 <h3 className="font-semibold text-foreground">{r.role}</h3>
                 <p className="mt-2 text-sm text-foreground/70">{r.desc}</p>
               </div>
@@ -153,13 +170,25 @@ export default function ResidencyPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <MarketingSectionHeader eyebrow="EXECUTION SYSTEMS" title="Structured Sprint & Delivery Workflows" subtitle="Residency execution is organized through structured sprint systems designed to simulate modern operational and product environments." align="center" />
           <PhaseTimeline className="mt-10" steps={sprintFlow} />
-          <div className="mx-auto mt-10 max-w-3xl rounded-2xl border border-border bg-card/60 p-5 text-sm text-foreground/70">
+          <div className="mx-auto mt-10 max-w-3xl rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5 text-sm text-foreground/70 backdrop-blur-lg shadow-soft">
             <p className="font-semibold text-foreground">Execution components</p>
             <ul className="mt-2 space-y-1">
-              <li>• Daily standups — team coordination and execution tracking</li>
-              <li>• Weekly reviews — progress systems, blockers, and quality reviews</li>
-              <li>• Biweekly demonstrations — mentor presentations, system reviews, collaborative showcases</li>
-              <li>• Monthly showcase — project presentations, demos, deployment visibility, execution validation</li>
+              <li className="flex items-center gap-2">
+                <span className="h-1 w-1 rounded-full bg-foreground/30" />
+                Daily standups — team coordination and execution tracking
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="h-1 w-1 rounded-full bg-foreground/30" />
+                Weekly reviews — progress systems, blockers, and quality reviews
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="h-1 w-1 rounded-full bg-foreground/30" />
+                Biweekly demonstrations — mentor presentations, system reviews, collaborative showcases
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="h-1 w-1 rounded-full bg-foreground/30" />
+                Monthly showcase — project presentations, demos, deployment visibility, execution validation
+              </li>
             </ul>
           </div>
         </div>

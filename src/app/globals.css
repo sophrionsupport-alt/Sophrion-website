@@ -13,6 +13,12 @@
     --cyan-500: 188 86% 48%;
     --brand-600: 262 83% 58%;
 
+    /* Glow color palette */
+    --glow-purple: 262 83% 58%;
+    --glow-cyan: 188 86% 48%;
+    --glow-blue: 217 91% 60%;
+    --glow-indigo: 239 84% 67%;
+
     color-scheme: dark;
   }
 
@@ -28,10 +34,21 @@
       radial-gradient(1200px circle at 18% 12%, hsl(var(--ring) / 0.22), transparent 45%),
       radial-gradient(1000px circle at 82% 36%, hsl(var(--cyan-500) / 0.14), transparent 45%);
     background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   * {
     border-color: hsl(var(--border));
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
   }
 }
 
@@ -46,23 +63,120 @@
   --color-ring: hsl(var(--ring));
 }
 
-@utility scrollbar-none {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+/* ─── Keyframes ───────────────────────────────────────────── */
+
+@keyframes float-orb {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25%      { transform: translate(30px, -20px) scale(1.05); }
+  50%      { transform: translate(-15px, 15px) scale(0.97); }
+  75%      { transform: translate(20px, 25px) scale(1.03); }
 }
 
-.scrollbar-none::-webkit-scrollbar {
-  display: none;
+@keyframes border-shimmer {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 1; }
 }
 
 @keyframes skeleton-shimmer {
-  0% {
-    transform: translateX(-60%);
-  }
-  100% {
-    transform: translateX(60%);
-  }
+  0%   { transform: translateX(-60%); }
+  100% { transform: translateX(60%); }
 }
+
+/* ─── Glass & Glow Utilities ──────────────────────────────── */
+
+.glass-surface {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-surface-strong {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(24px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glow-purple {
+  box-shadow:
+    0 0 0 1px hsl(var(--glow-purple) / 0.12),
+    0 8px 32px -8px hsl(var(--glow-purple) / 0.18),
+    0 2px 8px -2px hsl(var(--glow-purple) / 0.1);
+}
+
+.glow-cyan {
+  box-shadow:
+    0 0 0 1px hsl(var(--glow-cyan) / 0.12),
+    0 8px 32px -8px hsl(var(--glow-cyan) / 0.18),
+    0 2px 8px -2px hsl(var(--glow-cyan) / 0.1);
+}
+
+.glow-blue {
+  box-shadow:
+    0 0 0 1px hsl(var(--glow-blue) / 0.12),
+    0 8px 32px -8px hsl(var(--glow-blue) / 0.18),
+    0 2px 8px -2px hsl(var(--glow-blue) / 0.1);
+}
+
+.glow-indigo {
+  box-shadow:
+    0 0 0 1px hsl(var(--glow-indigo) / 0.12),
+    0 8px 32px -8px hsl(var(--glow-indigo) / 0.18),
+    0 2px 8px -2px hsl(var(--glow-indigo) / 0.1);
+}
+
+.shimmer-border {
+  position: relative;
+}
+
+.shimmer-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    hsl(var(--glow-purple) / 0.4) 25%,
+    hsl(var(--glow-cyan) / 0.5) 50%,
+    hsl(var(--glow-purple) / 0.4) 75%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: border-shimmer 3s linear infinite;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.shimmer-border:hover::before {
+  opacity: 1;
+}
+
+/* ─── Scanner Components (preserved) ──────────────────────── */
+
 .scan-line {
   width: 88%;
   height: 4px;
@@ -126,4 +240,15 @@
   inset: 0;
   background: radial-gradient(circle at center, transparent 45%, rgba(0,0,0,0.42) 100%);
   pointer-events: none;
+}
+
+/* ─── Scrollbar Utility ───────────────────────────────────── */
+
+@utility scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }

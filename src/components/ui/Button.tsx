@@ -13,7 +13,8 @@ export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition " +
+  "inline-flex items-center justify-center gap-2 rounded-xl font-medium " +
+  "transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] " +
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 " +
   "disabled:opacity-60 disabled:pointer-events-none " +
   "select-none";
@@ -32,13 +33,19 @@ const iconOnlySizes: Record<NonNullable<ButtonProps["size"]>, string> = {
 
 const variants: Record<NonNullable<ButtonProps["variant"]>, string> = {
   primary:
-    "text-white bg-brand-gradient shadow-glow hover:brightness-110 active:brightness-95",
+    "text-white bg-brand-gradient shadow-glow " +
+    "hover:brightness-110 hover:scale-[1.02] hover:shadow-[0_0_24px_-4px_hsl(var(--brand-600)/0.5),0_0_12px_-2px_hsl(var(--cyan-500)/0.3)] " +
+    "active:brightness-95 active:scale-[0.98]",
   secondary:
-    "text-foreground bg-white/6 border border-white/10 hover:bg-white/10 shadow-soft",
+    "text-foreground bg-white/6 border border-white/10 hover:bg-white/10 hover:border-white/15 shadow-soft " +
+    "hover:scale-[1.01] active:scale-[0.98]",
   ghost:
-    "text-foreground/90 hover:text-foreground hover:bg-white/8 border border-transparent hover:border-white/10",
+    "text-foreground/90 hover:text-foreground hover:bg-white/8 border border-transparent hover:border-white/10 " +
+    "hover:scale-[1.01]",
   danger:
-    "text-white bg-gradient-to-r from-rose-600 to-red-500 hover:brightness-110 active:brightness-95",
+    "text-white bg-gradient-to-r from-rose-600 to-red-500 " +
+    "hover:brightness-110 hover:scale-[1.02] hover:shadow-[0_0_20px_-4px_rgba(225,29,72,0.4)] " +
+    "active:brightness-95 active:scale-[0.98]",
 };
 
 function Spinner({ className }: { className?: string }) {

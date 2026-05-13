@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import NewsletterForm from "@/components/forms/NewsletterForm";
 import { MARKETING, PATHWAY_ANCHORS } from "@/lib/marketing/links";
+import { cn } from "@/lib/utils/cn";
 
 type Props = {
   className?: string;
@@ -27,18 +28,18 @@ const pathwayLinks = [
 
 export default function SiteFooter({ className }: Props) {
   return (
-    <footer className={`relative border-t border-white/10 ${className ?? ""}`}>
+    <footer className={cn("relative border-t border-white/[0.08]", className)}>
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-80"
+        className="pointer-events-none absolute inset-0 opacity-60"
         style={{
           background:
-            "radial-gradient(800px circle at 10% 20%, hsl(var(--ring) / 0.18), transparent 60%)," +
-            "radial-gradient(900px circle at 80% 40%, hsl(var(--cyan-500) / 0.14), transparent 60%)",
+            "radial-gradient(800px circle at 10% 20%, hsl(var(--glow-purple) / 0.12), transparent 55%)," +
+            "radial-gradient(900px circle at 80% 40%, hsl(var(--glow-cyan) / 0.1), transparent 55%)",
         }}
       />
 
-      <div className="relative mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      <div className="relative mx-auto max-w-6xl px-4 py-12 sm:px-6">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
           <div>
             <div className="flex items-center gap-3">

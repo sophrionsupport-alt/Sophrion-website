@@ -14,13 +14,23 @@ function Cta({ href, children, primary = true }: { href: string; children: React
     <Link
       href={href}
       className={cn(
-        "inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition",
-        primary ? "text-white hover:opacity-95" : "border border-white/10 bg-white/3 text-foreground/85"
+        "group relative inline-flex items-center gap-2 overflow-hidden rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-300",
+        primary
+          ? "text-white shadow-[0_10px_30px_-12px_hsl(var(--cyan-500)/0.45)] hover:scale-[1.03] hover:shadow-[0_0_24px_-4px_hsl(var(--cyan-500)/0.45),0_0_12px_-2px_hsl(var(--brand-600)/0.3)]"
+          : "border border-white/10 bg-white/[0.03] text-foreground/85 backdrop-blur-sm hover:border-white/[0.15] hover:bg-white/[0.05] hover:text-foreground hover:scale-[1.02]"
       )}
       style={primary ? { background: "linear-gradient(90deg, hsl(var(--brand-600)), hsl(var(--cyan-500)))" } : undefined}
     >
-      {children}
-      <ArrowRight className="h-4 w-4" />
+      <span className="relative z-10 inline-flex items-center gap-2">
+        {children}
+        <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+      </span>
+      {primary && (
+        <span
+          aria-hidden="true"
+          className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/[0.12] to-transparent transition-transform duration-700 group-hover:translate-x-full"
+        />
+      )}
     </Link>
   );
 }
@@ -47,30 +57,30 @@ function DeepDive({
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <MarketingSectionHeader eyebrow={eyebrow} title={title} subtitle={subtitle} />
         <div className="mt-10 grid gap-8 lg:grid-cols-3">
-          <div className="rounded-2xl border border-border bg-card/70 p-5">
-            <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground/55">Learning areas</h3>
-            <ul className="mt-3 space-y-2 text-sm text-foreground/75">
-              {learning.map((x) => (
-                <li key={x}>• {x}</li>
-              ))}
-            </ul>
-          </div>
-          <div className="rounded-2xl border border-border bg-card/70 p-5">
-            <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground/55">Sample projects</h3>
-            <ul className="mt-3 space-y-2 text-sm text-foreground/75">
-              {projects.map((x) => (
-                <li key={x}>• {x}</li>
-              ))}
-            </ul>
-          </div>
-          <div className="rounded-2xl border border-border bg-card/70 p-5">
-            <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground/55">Tools & systems</h3>
-            <ul className="mt-3 space-y-2 text-sm text-foreground/75">
-              {tools.map((x) => (
-                <li key={x}>• {x}</li>
-              ))}
-            </ul>
-          </div>
+          {[
+            { label: "Learning areas", items: learning, glow: "glow-purple" },
+            { label: "Sample projects", items: projects, glow: "glow-cyan" },
+            { label: "Tools & systems", items: tools, glow: "glow-blue" },
+          ].map((col) => (
+            <div
+              key={col.label}
+              className={cn(
+                "rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5 backdrop-blur-lg",
+                "transition-all duration-300 hover:border-white/[0.14]",
+                col.glow
+              )}
+            >
+              <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground/55">{col.label}</h3>
+              <ul className="mt-3 space-y-2 text-sm text-foreground/75">
+                {col.items.map((x) => (
+                  <li key={x} className="flex items-start gap-2">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground/20" />
+                    {x}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       </div>
     </section>

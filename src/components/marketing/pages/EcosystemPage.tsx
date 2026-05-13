@@ -225,30 +225,30 @@ export default function EcosystemPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <MarketingSectionHeader eyebrow="OUTCOMES" title="Building Execution-Ready Talent Ecosystems" subtitle="Sophrion is designed to help students, institutions, and innovation ecosystems transition into future-ready operational environments aligned with intelligent workforce systems." align="center" />
           <div className="mt-12 grid gap-8 lg:grid-cols-3">
-            <div className="rounded-2xl border border-border bg-card/70 p-6">
-              <h3 className="font-semibold text-foreground">For Students</h3>
-              <ul className="mt-3 space-y-2 text-sm text-foreground/70">
-                {outcomesStudents.map((t) => (
-                  <li key={t}>• {t}</li>
-                ))}
-              </ul>
-            </div>
-            <div className="rounded-2xl border border-border bg-card/70 p-6">
-              <h3 className="font-semibold text-foreground">For Institutions</h3>
-              <ul className="mt-3 space-y-2 text-sm text-foreground/70">
-                {outcomesInst.map((t) => (
-                  <li key={t}>• {t}</li>
-                ))}
-              </ul>
-            </div>
-            <div className="rounded-2xl border border-border bg-card/70 p-6">
-              <h3 className="font-semibold text-foreground">For Industry</h3>
-              <ul className="mt-3 space-y-2 text-sm text-foreground/70">
-                {outcomesIndustry.map((t) => (
-                  <li key={t}>• {t}</li>
-                ))}
-              </ul>
-            </div>
+            {[
+              { title: "For Students", items: outcomesStudents, glow: "glow-blue" },
+              { title: "For Institutions", items: outcomesInst, glow: "glow-indigo" },
+              { title: "For Industry", items: outcomesIndustry, glow: "glow-purple" },
+            ].map((section, idx) => (
+              <div
+                key={section.title}
+                className={cn(
+                  "rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 backdrop-blur-lg",
+                  "transition-all duration-300 hover:border-white/[0.14]",
+                  section.glow
+                )}
+              >
+                <h3 className="font-semibold text-foreground">{section.title}</h3>
+                <ul className="mt-3 space-y-2 text-sm text-foreground/70">
+                  {section.items.map((t) => (
+                    <li key={t} className="flex items-start gap-2">
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground/20" />
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         </div>
       </section>

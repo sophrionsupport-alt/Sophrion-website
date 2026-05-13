@@ -112,7 +112,7 @@ function InnerContainer({
         padded !== false && "px-4 sm:px-6 lg:px-8",
         pyClass[py ?? "none"],
         center && "text-center",
-        glass && "rounded-3xl border bg-white/5 backdrop-blur",
+        glass && "rounded-3xl glass-surface",
         className
       )}
       {...props}
