@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
             email: payload.email,
             name: payload.name ?? null,
             source: payload.source ?? "website",
-            status: "SUBSCRIBED",
+            status: "active",
             unsubscribed_at: null,
           },
         ],

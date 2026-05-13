@@ -1,12 +1,11 @@
-"use client";
-
 import * as React from "react";
-import { motion } from "motion/react";
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import FeatureGrid from "@/components/marketing/FeatureGrid";
 import MarketingSectionHeader from "@/components/marketing/MarketingSectionHeader";
 import { MARKETING } from "@/lib/marketing/links";
+
+import { marketingContainerClass, marketingHeroClass, marketingHeroSectionYClass } from "@/lib/marketing/layout";
 
 export default function Page() {
   const problemGrid = [
@@ -44,6 +43,15 @@ export default function Page() {
       </div>
 
       {/* 1 Hero */}
+
+      <section className={marketingHeroSectionYClass}>
+        <div className={marketingContainerClass}>
+          <div
+            className={marketingHeroClass}
+          >
+            <p className="text-sm font-semibold tracking-wide text-foreground/70">ABOUT SOPHRION</p>
+            <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+
       <section className="py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -54,10 +62,22 @@ export default function Page() {
           >
             <p className="text-sm font-semibold tracking-wide text-foreground/70">ABOUT SOPHRION</p>
             <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
+
               <span className="bg-linear-to-l from-[hsl(var(--brand-600))] to-[hsl(var(--cyan-500))] bg-clip-text text-transparent">
                 Redefining Career Acceleration For The AI Era
               </span>
             </h1>
+
+            <p className="mt-6 text-lg leading-relaxed text-foreground/75 sm:text-xl">
+              Sophrion is an AI-native career acceleration and innovation ecosystem designed to bridge the growing gap
+              between academic learning and real-world execution through production-oriented systems, collaborative workflows,
+              and future-ready learning environments.
+            </p>
+            <p className="mt-6 text-sm text-foreground/55">
+              Built for students, institutions, innovation ecosystems, and the intelligent economy of the future.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+
             <p className="mt-5 text-lg leading-relaxed text-foreground/70">
               Sophrion is an AI-native career acceleration and innovation ecosystem designed to bridge the growing gap
               between academic learning and real-world execution through production-oriented systems, collaborative workflows,
@@ -67,6 +87,7 @@ export default function Page() {
               Built for students, institutions, innovation ecosystems, and the intelligent economy of the future.
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-3">
+
               <Link
                 href={MARKETING.ecosystem}
                 className="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-95"
@@ -84,13 +105,17 @@ export default function Page() {
                 Partner With Sophrion
               </Link>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* 2 Why exists */}
       <section className="border-t border-white/10 py-16 sm:py-20">
+
+        <div className={marketingContainerClass}>
+
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
           <MarketingSectionHeader
             eyebrow="OUR PURPOSE"
             title="Why Sophrion Exists"
@@ -109,7 +134,11 @@ export default function Page() {
 
       {/* 3 Structural problem */}
       <section className="py-16 sm:py-20">
+
+        <div className={marketingContainerClass}>
+
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
           <MarketingSectionHeader
             eyebrow="THE CHALLENGE"
             title="The Workforce Is Changing Faster Than Traditional Learning Systems"
@@ -121,7 +150,11 @@ export default function Page() {
 
       {/* 4 Vision */}
       <section className="border-t border-white/10 py-16 sm:py-20">
+
+        <div className={marketingContainerClass}>
+
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
           <MarketingSectionHeader
             eyebrow="OUR VISION"
             title="Building Future-Ready Execution Ecosystems"
@@ -139,7 +172,11 @@ export default function Page() {
 
       {/* 5 Philosophy */}
       <section className="py-16 sm:py-20">
+
+        <div className={marketingContainerClass}>
+
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
           <MarketingSectionHeader
             eyebrow="OUR PHILOSOPHY"
             title="Learn By Building. Grow Through Execution."
@@ -152,7 +189,11 @@ export default function Page() {
 
       {/* 6 Differentiators */}
       <section className="border-t border-white/10 py-16 sm:py-20">
+
+        <div className={marketingContainerClass}>
+
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
           <MarketingSectionHeader
             eyebrow="WHY SOPHRION"
             title="More Than A Traditional Learning Platform"
@@ -164,6 +205,11 @@ export default function Page() {
 
       {/* 7 Founder */}
       <section className="py-16 sm:py-20">
+
+        <div className={marketingContainerClass}>
+          <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
+            <div>
+
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
             <motion.div
@@ -172,10 +218,38 @@ export default function Page() {
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
             >
+
               <p className="text-sm font-semibold tracking-wide text-foreground/70">FOUNDER & VISION ARCHITECT</p>
               <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Srikanth Molugu</h2>
               <p className="mt-5 leading-relaxed text-foreground/75">
                 Srikanth Molugu is an entrepreneur and ecosystem builder focused on creating future-ready systems at the intersection of education, artificial intelligence, innovation, and execution-driven workforce development.
+
+              </p>
+              <p className="mt-4 leading-relaxed text-foreground/75">
+                As the founder of Sophrion, he is building an AI-native ecosystem designed to help students transition from passive learning into real execution environments through production systems, collaborative workflows, and future-oriented career acceleration pathways.
+              </p>
+            </div>
+            <div className="flex min-h-[220px] items-center justify-center rounded-3xl border border-border bg-white/3 p-8 backdrop-blur">
+              <Sparkles className="h-14 w-14 text-[hsl(var(--cyan-500))]" aria-hidden />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 8 Long-term vision */}
+      <section className="border-t border-white/10 py-16 sm:py-20">
+        <div className={marketingContainerClass}>
+          <MarketingSectionHeader eyebrow="THE FUTURE" title="Building Infrastructure For The Intelligent Economy" />
+          <div className="mt-8 max-w-3xl space-y-4 text-foreground/75">
+            <p>
+              Sophrion is designed to evolve into a scalable ecosystem powering AI-native workforce development, intelligent learning systems,
+              innovation ecosystems, execution-oriented career acceleration, and future-ready talent infrastructure.
+            </p>
+            <p>
+              The long-term mission is to help build a generation of intelligent builders, adaptive engineers, AI-native professionals,
+              execution-focused innovators, and future-ready contributors capable of thriving in rapidly evolving technological ecosystems.
+            </p>
+
               </p>
               <p className="mt-4 leading-relaxed text-foreground/75">
                 As the founder of Sophrion, he is building an AI-native ecosystem designed to help students transition from passive learning into real execution environments through production systems, collaborative workflows, and future-oriented career acceleration pathways.
@@ -190,9 +264,15 @@ export default function Page() {
             >
               <Sparkles className="h-14 w-14 text-[hsl(var(--cyan-500))]" aria-hidden />
             </motion.div>
+
           </div>
         </div>
       </section>
+
+
+      {/* 9 Final CTA */}
+      <section className="py-16 sm:pb-24">
+        <div className={marketingContainerClass}>
 
       {/* 8 Long-term vision */}
       <section className="border-t border-white/10 py-16 sm:py-20">
@@ -214,6 +294,7 @@ export default function Page() {
       {/* 9 Final CTA */}
       <section className="py-16 sm:pb-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
           <div className="rounded-3xl border border-white/10 bg-white/3 p-6 backdrop-blur sm:p-10">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="max-w-2xl">

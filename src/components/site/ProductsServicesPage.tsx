@@ -1,7 +1,5 @@
-"use client";
-
 import * as React from "react";
-import { motion } from "motion/react";
+import { marketingContainerClass, marketingHeroClass, marketingHeroSectionYClass } from "@/lib/marketing/layout";
 
 type Variant = "products" | "services";
 
@@ -31,28 +29,23 @@ export default function ProductsServicesPage({ variant }: { variant: Variant }) 
         <div className="absolute right-[12%] top-[32%] h-225 w-225 rounded-full bg-[radial-gradient(closest-side,hsl(var(--cyan-500)/0.12),transparent_70%)]" />
       </div>
 
-      <section className="py-16 sm:py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="max-w-3xl"
-          >
+      <section className={marketingHeroSectionYClass}>
+        <div className={marketingContainerClass}>
+          <div className={marketingHeroClass}>
             <p className="text-sm font-semibold tracking-wide text-foreground/70">
               {copy.kicker}
             </p>
 
-            <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
+            <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
               <span className="bg-linear-to-l from-[hsl(var(--brand-600))] to-[hsl(var(--cyan-500))] bg-clip-text text-transparent">
                 {copy.headline}
               </span>
             </h1>
 
-            <p className="mt-5 text-lg leading-relaxed text-foreground/70">
+            <p className="mt-6 text-lg leading-relaxed text-foreground/75 sm:text-xl">
               {copy.body}
             </p>
-          </motion.div>
+          </div>
         </div>
       </section>
     </div>

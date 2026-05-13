@@ -38,7 +38,11 @@ export default function SiteFooter({ className }: Props) {
         }}
       />
 
+
+      <div className="relative mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+
       <div className="relative mx-auto max-w-6xl px-4 py-10 sm:px-6">
+
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
           <div>
             <div className="flex items-center gap-3">
@@ -137,7 +141,11 @@ export default function SiteFooter({ className }: Props) {
       </div>
 
       <div className="border-t border-white/10">
+
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-5 text-xs text-foreground/60 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
+
         <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-5 text-xs text-foreground/60 sm:px-6 md:flex-row md:items-center md:justify-between">
+
           <p>© {new Date().getFullYear()} Sophrion. All rights reserved.</p>
           <p className="text-foreground/50">Building future-ready execution ecosystems.</p>
         </div>

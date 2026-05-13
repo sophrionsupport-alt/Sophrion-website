@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/requireAdmin";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
 
@@ -25,6 +26,8 @@ export async function GET(req: Request) {
     return fail(auth.error, auth.status);
   }
 
+  const supabase = createSupabaseAdminClient();
+
   const { searchParams } = new URL(req.url);
 
   const qRaw = (searchParams.get("q") ?? "").trim();
@@ -46,7 +49,7 @@ export async function GET(req: Request) {
     ? Math.max(parsedOffset, 0)
     : 0;
 
-  let query = auth.supabase
+  let query = supabase
     .from("newsletter_subscribers")
     .select(
       `

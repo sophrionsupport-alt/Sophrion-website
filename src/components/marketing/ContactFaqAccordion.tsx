@@ -9,7 +9,11 @@ export default function ContactFaqAccordion() {
   const [open, setOpen] = React.useState<number | null>(0);
 
   return (
+
+    <div className="mx-auto max-w-4xl space-y-2">
+
     <div className="mx-auto max-w-3xl space-y-2">
+
       {CONTACT_FAQ.map((item, i) => {
         const isOpen = open === i;
         return (

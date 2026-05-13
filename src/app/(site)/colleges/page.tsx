@@ -1,9 +1,7 @@
-"use client";
-
 import * as React from "react";
-import { motion } from "motion/react";
 import Link from "next/link";
 import { LayoutDashboard, BookOpen, Users, ShieldCheck } from "lucide-react";
+import { marketingContainerClass, marketingHeroClass } from "@/lib/marketing/layout";
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -19,24 +17,21 @@ export default function Page() {
       </div>
 
       {/* Hero */}
-      <section className="relative overflow-hidden py-16 sm:py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden py-16 sm:py-24">
+        <div className={marketingContainerClass}>
           <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="max-w-2xl"
+            <div
+              className={marketingHeroClass}
             >
               <p className="text-xs tracking-[0.25em] text-foreground/60">
                 COLLEGES
               </p>
 
-              <h1 className="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">
+              <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
                 Readiness infrastructure for placement teams
               </h1>
 
-              <p className="mt-4 leading-relaxed text-foreground/70">
+              <p className="mt-6 text-lg leading-relaxed text-foreground/75 sm:text-xl">
                 A measurable, repeatable system your institution can run across
                 departments and batches — without complex dashboards.
               </p>
@@ -92,12 +87,9 @@ export default function Page() {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.08 }}
+            <div
               className="rounded-3xl border border-border bg-card p-6"
             >
               <div className="grid gap-4 sm:grid-cols-2">
@@ -106,14 +98,14 @@ export default function Page() {
                 <Feature icon={Users} title="Execution support" body="Programs your team can run." />
                 <Feature icon={ShieldCheck} title="Institution-grade" body="Repeatable processes and clarity." />
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* CTA */}
       <section className="border-t border-border py-14">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className={marketingContainerClass}>
           <div className="rounded-3xl border border-border bg-white/3 p-6 backdrop-blur sm:p-10">
             <h2 className="text-2xl font-semibold text-foreground">
               Want a rollout plan that doesn’t disrupt your calendar?

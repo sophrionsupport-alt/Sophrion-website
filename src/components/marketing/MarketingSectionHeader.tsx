@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
+
 import { motion } from "motion/react";
+
 import { cn } from "@/lib/utils/cn";
 
 export default function MarketingSectionHeader({
@@ -24,7 +26,8 @@ export default function MarketingSectionHeader({
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.5 }}
       className={cn(
-        align === "center" && "mx-auto max-w-3xl text-center",
+        align === "center" &&
+          "mx-auto max-w-4xl text-center",
         className
       )}
     >
@@ -33,6 +36,7 @@ export default function MarketingSectionHeader({
           {eyebrow}
         </p>
       ) : null}
+
       <h2
         className={cn(
           "mt-2 text-3xl font-semibold tracking-tight sm:text-4xl",
@@ -41,6 +45,7 @@ export default function MarketingSectionHeader({
       >
         {title}
       </h2>
+
       {subtitle ? (
         <div className="mt-4 text-base leading-relaxed text-foreground/70 sm:text-lg">
           {subtitle}

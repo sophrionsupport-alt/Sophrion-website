@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import Nav from "./Nav";
+import { marketingContainerClass } from "@/lib/marketing/layout";
 import { cn } from "@/lib/utils/cn";
 
 type Props = {
@@ -76,7 +77,7 @@ export default function SiteHeader({ className }: Props) {
         )}
       />
 
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className={cn("relative", marketingContainerClass)}>
         <div className="flex min-h-17 items-center justify-between gap-4 py-3">
           <Link
             href={isAdminRoute ? "/admin" : "/"}

@@ -4,7 +4,11 @@ import { MARKETING } from "@/lib/marketing/links";
 export default function FooterCtaStrip() {
   return (
     <section className="border-t border-white/10 bg-[hsl(var(--background)/0.92)] py-10 backdrop-blur-xl">
+
+      <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-4 px-4 text-center sm:px-6 lg:flex-row lg:justify-between lg:px-8 lg:text-left">
+
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-4 text-center sm:px-6 lg:flex-row lg:justify-between lg:text-left">
+
         <div className="max-w-xl">
           <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
             Build Beyond Traditional Learning

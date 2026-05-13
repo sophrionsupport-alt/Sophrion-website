@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+
+export const runtime = "nodejs";
 
 type RequestBody = {
   email?: string;
@@ -8,6 +10,19 @@ type RequestBody = {
 
 function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function newsletterDbErrorMessage(raw: string): string {
+  const m = raw.toLowerCase();
+  if (
+    m.includes("could not find the table") &&
+    m.includes("newsletter_subscribers")
+  ) {
+    return process.env.NODE_ENV === "development"
+      ? "Supabase is missing table public.newsletter_subscribers. In the Supabase SQL Editor, run the SQL file supabase/migrations/20260513150000_newsletter_subscribers.sql, then try again."
+      : "Signup is temporarily unavailable. Please try again later.";
+  }
+  return raw;
 }
 
 export async function POST(req: Request) {
@@ -31,40 +46,30 @@ export async function POST(req: Request) {
       );
     }
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!supabaseUrl || !serviceRoleKey) {
+    let supabase;
+    try {
+      supabase = createSupabaseAdminClient();
+    } catch {
       return NextResponse.json(
         { ok: false, message: "Server configuration is missing." },
         { status: 500 }
       );
     }
 
-    const supabase = createClient(supabaseUrl, serviceRoleKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
-    });
-
-    const { error } = await supabase.from("newsletter_subscribers").insert([
+    const { error } = await supabase.from("newsletter_subscribers").upsert(
       {
         email,
-        source,
+        source: source || "website",
+        name: null,
+        status: "active",
+        unsubscribed_at: null,
       },
-    ]);
+      { onConflict: "email" }
+    );
 
     if (error) {
-      if (error.code === "23505") {
-        return NextResponse.json(
-          { ok: true, message: "You are already subscribed." },
-          { status: 200 }
-        );
-      }
-
       return NextResponse.json(
-        { ok: false, message: error.message },
+        { ok: false, message: newsletterDbErrorMessage(error.message) },
         { status: 500 }
       );
     }

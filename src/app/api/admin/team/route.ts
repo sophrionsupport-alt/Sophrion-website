@@ -1,6 +1,7 @@
 // app/api/admin/teams/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
 
@@ -83,7 +84,7 @@ export async function GET(req: NextRequest) {
     const admin = await requireAdmin();
     if (!admin.ok) return fail(admin.error, admin.status);
 
-    const supabase = admin.supabase;
+    const supabase = createSupabaseAdminClient();
     const { searchParams } = new URL(req.url);
 
     const q = searchParams.get("q")?.trim() ?? "";

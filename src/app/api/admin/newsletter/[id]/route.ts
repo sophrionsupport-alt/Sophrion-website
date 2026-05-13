@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/requireAdmin";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 function json(
   ok: boolean,
@@ -18,6 +19,8 @@ export async function PATCH(
   if (!auth.ok) {
     return json(false, { error: auth.error }, auth.status);
   }
+
+  const supabase = createSupabaseAdminClient();
 
   const { id } = await ctx.params;
 
@@ -38,7 +41,7 @@ export async function PATCH(
     return json(false, { error: "Invalid status." }, 400);
   }
 
-  const { data, error } = await auth.supabase
+  const { data, error } = await supabase
     .from("newsletter_subscribers")
     .update({
       status: nextStatus,
