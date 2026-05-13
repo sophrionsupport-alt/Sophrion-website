@@ -1,0 +1,44 @@
+import * as React from "react";
+import { cn } from "@/lib/utils/cn";
+
+export default function MarketingSectionHeader({
+  eyebrow,
+  title,
+  subtitle,
+  className,
+  align = "left",
+}: {
+  eyebrow?: string;
+  title: React.ReactNode;
+  subtitle?: React.ReactNode;
+  className?: string;
+  align?: "left" | "center";
+}) {
+  return (
+    <div
+      className={cn(
+        align === "center" && "mx-auto max-w-4xl text-center",
+        className
+      )}
+    >
+      {eyebrow ? (
+        <p className="text-sm font-semibold tracking-wide text-foreground/70">
+          {eyebrow}
+        </p>
+      ) : null}
+      <h2
+        className={cn(
+          "mt-2 text-3xl font-semibold tracking-tight sm:text-4xl",
+          align === "center" && "mx-auto"
+        )}
+      >
+        {title}
+      </h2>
+      {subtitle ? (
+        <div className="mt-4 text-base leading-relaxed text-foreground/70 sm:text-lg">
+          {subtitle}
+        </div>
+      ) : null}
+    </div>
+  );
+}

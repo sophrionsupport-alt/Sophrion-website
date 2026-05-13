@@ -1,6 +1,16 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
+type CookieMutate = {
+  path?: string;
+  maxAge?: number;
+  domain?: string;
+  httpOnly?: boolean;
+  secure?: boolean;
+  sameSite?: "strict" | "lax" | "none" | boolean;
+  expires?: Date;
+};
+
 export async function proxy(req: NextRequest) {
   const res = NextResponse.next();
 
@@ -12,10 +22,10 @@ export async function proxy(req: NextRequest) {
         get(name: string) {
           return req.cookies.get(name)?.value;
         },
-        set(name: string, value: string, options: any) {
+        set(name: string, value: string, options: CookieMutate) {
           res.cookies.set({ name, value, ...options });
         },
-        remove(name: string, options: any) {
+        remove(name: string, options: CookieMutate) {
           res.cookies.set({ name, value: "", ...options });
         },
       },

@@ -190,8 +190,8 @@ export async function GET(req: Request) {
 
   const teamIds = teamRows.map((row) => row.id);
 
-  let eventsMap = new Map<string, string | null>();
-  let teamCountsMap = new Map<string, number>();
+  const eventsMap = new Map<string, string | null>();
+  const teamCountsMap = new Map<string, number>();
 
   if (eventIds.length > 0) {
     const { data: eventsData, error: eventsError } = await admin

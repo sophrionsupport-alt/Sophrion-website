@@ -63,8 +63,8 @@ export default function EditBlogPostPage({
         setCoverUrl(p.cover_url ?? "");
         setContent(p.content);
         setPublished(p.is_published);
-      } catch (err: any) {
-        setError(err.message || "Failed to load post");
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Failed to load post");
       } finally {
         setLoading(false);
       }
@@ -103,8 +103,8 @@ export default function EditBlogPostPage({
       }
 
       router.refresh();
-    } catch (err: any) {
-      setError(err.message || "Failed to save post");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to save post");
     } finally {
       setSaving(false);
     }

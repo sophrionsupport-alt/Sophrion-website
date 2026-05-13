@@ -4,7 +4,6 @@ import * as React from "react";
 import { useSearchParams } from "next/navigation";
 
 import FiltersBar, { type FiltersState } from "@/components/admin/FiltersBar";
-import BulkActionsBar from "@/components/admin/BulkActionsBar";
 import AdminTable, { type AdminRow } from "@/components/admin/AdminTable";
 import Modal from "@/components/ui/Modal";
 
@@ -61,7 +60,7 @@ function getRegistrationById(id: string) {
 return raw.find((r) => r.id === id) ?? null;
 }
 
-async function loadRegistrations() {
+const loadRegistrations = React.useCallback(async () => {
 try {
 setLoading(true);
 
@@ -129,11 +128,11 @@ setLoading(true);
 }
 
 
-}
+}, [filters, eventFilter]);
 
 React.useEffect(() => {
-loadRegistrations();
-}, [filters, eventFilter]);
+void loadRegistrations();
+}, [loadRegistrations]);
 
 async function updateStatus(
 id: string,

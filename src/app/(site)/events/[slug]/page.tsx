@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft,
@@ -157,7 +158,7 @@ function Info({ label, value }: { label: string; value: string }) {
 function Schedule({ schedule }: { schedule: unknown }) {
   if (!Array.isArray(schedule) || schedule.length === 0) return null;
 
-  const grouped: Record<string, any[]> = {};
+  const grouped: Record<string, Record<string, unknown>[]> = {};
 
   schedule.forEach((item) => {
     if (!item || typeof item !== "object") return;
@@ -454,11 +455,14 @@ export default async function EventDetailPage({
 
       <div className="mt-6 overflow-hidden rounded-3xl border border-white/10 bg-background/40">
         {event.banner_url ? (
-          <div className="aspect-16/6">
-            <img
+          <div className="relative aspect-16/6">
+            <Image
               src={event.banner_url}
               alt={event.title}
-              className="h-full w-full object-cover"
+              fill
+              className="object-cover"
+              sizes="(max-width: 1280px) 100vw, 1280px"
+              unoptimized
             />
           </div>
         ) : null}

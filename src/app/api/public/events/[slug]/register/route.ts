@@ -148,8 +148,9 @@ export async function POST(
       },
       message: "Registration submitted successfully.",
     });
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("[event/register] unexpected error:", e);
-    return fail(e?.message ?? "Unexpected error", 500);
+    const msg = e instanceof Error ? e.message : "Unexpected error";
+    return fail(msg, 500);
   }
 }

@@ -127,7 +127,7 @@ export const serverEnv = (isServer
 
       SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
 
-      EMAIL_PROVIDER: process.env.EMAIL_PROVIDER as any,
+      EMAIL_PROVIDER: process.env.EMAIL_PROVIDER,
       ZEPTOMAIL_HOST: process.env.ZEPTOMAIL_HOST,
       ZEPTOMAIL_API_KEY: process.env.ZEPTOMAIL_API_KEY,
 
@@ -157,16 +157,16 @@ export const serverEnv = (isServer
       SEED_ADMIN_EMAILS: process.env.SEED_ADMIN_EMAILS,
       DEFAULT_ADMIN_ROLE: process.env.DEFAULT_ADMIN_ROLE,
 
-      COLLEGE_ONBOARDING_MODE: process.env.COLLEGE_ONBOARDING_MODE as any,
+      COLLEGE_ONBOARDING_MODE: process.env.COLLEGE_ONBOARDING_MODE,
       COLLEGE_CAN_PUBLISH: process.env.COLLEGE_CAN_PUBLISH,
-      PUBLISH_MODE: process.env.PUBLISH_MODE as any,
+      PUBLISH_MODE: process.env.PUBLISH_MODE,
 
       REG_REQUIRED_FIELDS: process.env.REG_REQUIRED_FIELDS,
 
       CAREERS_TYPES: process.env.CAREERS_TYPES,
       LEARN_TAGS: process.env.LEARN_TAGS,
 
-      BLOG_ENGINE: process.env.BLOG_ENGINE as any,
+      BLOG_ENGINE: process.env.BLOG_ENGINE,
       BLOG_INITIAL_POSTS: process.env.BLOG_INITIAL_POSTS,
 
       LEGAL_TERMS_ENABLED: process.env.LEGAL_TERMS_ENABLED,
@@ -174,7 +174,7 @@ export const serverEnv = (isServer
         process.env.LEGAL_REFUND_CANCELLATION_ENABLED,
       LEGAL_COOKIE_POLICY_ENABLED: process.env.LEGAL_COOKIE_POLICY_ENABLED,
 
-      NODE_ENV: (process.env.NODE_ENV as any) ?? "development",
+      NODE_ENV: process.env.NODE_ENV ?? "development",
     })
   : null) as z.infer<typeof ServerEnvSchema> | null;
 

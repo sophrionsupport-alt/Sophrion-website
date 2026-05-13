@@ -1,8 +1,7 @@
-"use client";
-
-import { motion } from "motion/react";
+import * as React from "react";
 import Link from "next/link";
 import { BookOpen, Briefcase, Users, Sparkles, ArrowRight } from "lucide-react";
+import { marketingContainerClass, marketingHeroClass } from "@/lib/marketing/layout";
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -17,25 +16,22 @@ export default function Page() {
       </div>
 
       {/* Hero */}
-      <section className="relative overflow-hidden py-16 sm:py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden py-16 sm:py-24">
+        <div className={marketingContainerClass}>
           <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="max-w-2xl"
+            <div
+              className={marketingHeroClass}
             >
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/3 px-3 py-1 text-xs text-foreground/70 backdrop-blur">
                 <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--cyan-500))]" />
                 STUDENTS
               </div>
 
-              <h1 className="mt-5 text-4xl font-semibold tracking-tight sm:text-5xl">
+              <h1 className="mt-5 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
                 Build readiness that recruiters can trust
               </h1>
 
-              <p className="mt-4 text-base leading-relaxed text-foreground/70 sm:text-lg">
+              <p className="mt-6 text-lg leading-relaxed text-foreground/75 sm:text-xl">
                 Practice with structure, get measurable signals, and improve week
                 by week — without clutter.
               </p>
@@ -88,13 +84,10 @@ export default function Page() {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
             {/* Right visual */}
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.08 }}
+            <div
               className="rounded-3xl border border-white/10 bg-white/3 p-6 backdrop-blur"
             >
               <div className="mb-4">
@@ -138,14 +131,14 @@ export default function Page() {
                   Sophrion optimizes for.
                 </p>
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* CTA */}
       <section className="border-t border-white/10 py-14">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className={marketingContainerClass}>
           <div className="rounded-3xl border border-white/10 bg-white/3 p-6 backdrop-blur sm:p-10">
             <h2 className="text-2xl font-semibold text-foreground">
               Want your campus to run a focused program?

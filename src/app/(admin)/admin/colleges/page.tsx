@@ -61,7 +61,7 @@ export default function CollegesPage() {
       const res = await fetch(`/api/admin/colleges?${qs.toString()}`);
       const json = (await res.json()) as ApiResp<CollegeRecord[]>;
 
-      if (!json?.ok) throw new Error((json as any)?.error || "Failed to load colleges");
+      if (!json.ok) throw new Error(json.error || "Failed to load colleges");
 
       const list = json.data ?? [];
 
@@ -106,7 +106,7 @@ export default function CollegesPage() {
       body: JSON.stringify({ status }),
     });
     const json = (await res.json()) as ApiResp;
-    if (!json?.ok) throw new Error((json as any)?.error || "Update failed");
+    if (!json.ok) throw new Error(json.error || "Update failed");
     await loadColleges();
     setSelectedIds((prev) => prev.filter((x) => x !== id));
   }

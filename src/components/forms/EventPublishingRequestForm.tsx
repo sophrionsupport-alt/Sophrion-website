@@ -80,41 +80,41 @@ export default function EventPublishingRequestForm() {
         <Input
           label="College name"
           value={form.college_name}
-          onChange={(e: any) => patch("college_name", e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => patch("college_name", e.target.value)}
           required
         />
         <Input
           label="Contact person"
           value={form.contact_name}
-          onChange={(e: any) => patch("contact_name", e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => patch("contact_name", e.target.value)}
           required
         />
         <Input
           label="Email"
           type="email"
           value={form.email}
-          onChange={(e: any) => patch("email", e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => patch("email", e.target.value)}
           required
         />
         <Input
           label="Phone (optional)"
           value={form.phone}
-          onChange={(e: any) => patch("phone", e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => patch("phone", e.target.value)}
         />
         <Input
           label="City (optional)"
           value={form.city}
-          onChange={(e: any) => patch("city", e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => patch("city", e.target.value)}
         />
         <Input
           label="State (optional)"
           value={form.state}
-          onChange={(e: any) => patch("state", e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => patch("state", e.target.value)}
         />
         <Input
           label="Website (optional)"
           value={form.website}
-          onChange={(e: any) => patch("website", e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => patch("website", e.target.value)}
           className="md:col-span-2"
         />
       </div>

@@ -1,5 +1,6 @@
 // src/components/tickets/TicketQRCode.tsx
 
+import Image from "next/image";
 import QRCode from "qrcode";
 
 type Props = {
@@ -14,10 +15,13 @@ export default async function TicketQRCode({ value }: Props) {
 
   return (
     <div className="rounded-3xl border border-white/10 bg-white p-4 shadow-2xl">
-      <img
+      <Image
         src={dataUrl}
         alt="Ticket QR Code"
+        width={320}
+        height={320}
         className="h-auto w-full max-w-70 rounded-xl"
+        unoptimized
       />
     </div>
   );

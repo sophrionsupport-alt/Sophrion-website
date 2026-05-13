@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { z } from "zod";
+import { parseApiErrorMessage } from "@/lib/utils/parseApiErrorMessage";
 
 type SubmitState = { ok: boolean; message: string } | null;
 
@@ -25,8 +26,8 @@ function cn(...classes: Array<string | false | undefined | null>) {
   return classes.filter(Boolean).join(" ");
 }
 
-function getErrMessage(payload: any) {
-  return payload?.error || payload?.message || "Submission failed. Please try again.";
+function getErrMessage(payload: unknown) {
+  return parseApiErrorMessage(payload);
 }
 
 export default function ContactForm() {
@@ -100,8 +101,8 @@ export default function ContactForm() {
 
       setResult({ ok: true, message: json?.message || "Thanks — we received your message." });
       setForm({ name: "", email: "", subject: "", message: "", company: "" });
-    } catch (err: any) {
-      setResult({ ok: false, message: err?.message || "Something went wrong." });
+    } catch (err: unknown) {
+      setResult({ ok: false, message: err instanceof Error ? err.message : "Something went wrong." });
     } finally {
       setLoading(false);
     }

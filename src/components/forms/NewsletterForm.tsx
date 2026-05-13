@@ -1,13 +1,16 @@
 "use client";
 
 import * as React from "react";
+import { parseApiErrorMessage } from "@/lib/utils/parseApiErrorMessage";
 
 type ApiOk<T = unknown> = { ok: true; data?: T; message?: string };
 type ApiFail = { ok: false; error?: string; message?: string };
 type ApiResp<T = unknown> = ApiOk<T> | ApiFail;
 
-function getErrMessage(payload: any) {
-  return payload?.error || payload?.message || "Could not subscribe right now. Please try again.";
+function getErrMessage(payload: unknown) {
+  const m = parseApiErrorMessage(payload);
+  if (m !== "Something went wrong. Please try again.") return m;
+  return "Could not subscribe right now. Please try again.";
 }
 
 function cn(...classes: Array<string | false | undefined | null>) {
@@ -39,12 +42,12 @@ export default function NewsletterForm(props: { source?: string; className?: str
 
       const json = (await res.json().catch(() => ({}))) as ApiResp;
 
-      if (!res.ok || (json as any)?.ok === false) {
+      if (!res.ok || !json.ok) {
         setErrorMsg(getErrMessage(json));
         return;
       }
 
-      setSuccessMsg((json as any)?.message || "Subscribed.");
+      setSuccessMsg(json.message || "Subscribed.");
       setEmail("");
     } catch {
       setErrorMsg("Network error. Please try again.");

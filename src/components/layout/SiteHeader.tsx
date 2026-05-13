@@ -2,8 +2,10 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import Nav from "./Nav";
+import { marketingContainerClass } from "@/lib/marketing/layout";
 import { cn } from "@/lib/utils/cn";
 
 type Props = {
@@ -25,7 +27,7 @@ export default function SiteHeader({ className }: Props) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 transition-all duration-300",
+        "relative z-50 sticky top-0 transition-all duration-300",
         scrolled
           ? [
               "border-b border-white/12",
@@ -75,15 +77,17 @@ export default function SiteHeader({ className }: Props) {
         )}
       />
 
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className={cn("relative", marketingContainerClass)}>
         <div className="flex min-h-17 items-center justify-between gap-4 py-3">
           <Link
             href={isAdminRoute ? "/admin" : "/"}
             className="inline-flex min-w-0 shrink-0 items-center gap-3"
           >
-            <img
+            <Image
               src="/images/brand/symbol-logo.png"
               alt="Sophrion"
+              width={36}
+              height={36}
               className="h-9 w-9 object-contain"
             />
 
@@ -92,7 +96,7 @@ export default function SiteHeader({ className }: Props) {
                 {isAdminRoute ? "Sophrion Admin" : "Sophrion"}
               </div>
               <div className="truncate text-xs text-foreground/60">
-                {isAdminRoute ? "Operations Console" : "Future Within"}
+                {isAdminRoute ? "Operations Console" : "Future-Ready Execution Ecosystem"}
               </div>
             </div>
           </Link>

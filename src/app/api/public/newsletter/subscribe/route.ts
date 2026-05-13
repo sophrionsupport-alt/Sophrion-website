@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
             email: payload.email,
             name: payload.name ?? null,
             source: payload.source ?? "website",
-            status: "SUBSCRIBED",
+            status: "active",
             unsubscribed_at: null,
           },
         ],
@@ -62,7 +62,8 @@ export async function POST(request: NextRequest) {
       email: data.email,
       status: data.status,
     });
-  } catch (e: any) {
-    return fail(e?.message ?? "Unexpected error", 500);
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : "Unexpected error";
+    return fail(msg, 500);
   }
 }
