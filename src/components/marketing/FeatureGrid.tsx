@@ -1,4 +1,9 @@
+"use client";
+
 import * as React from "react";
+
+import { motion } from "motion/react";
+
 import { cn } from "@/lib/utils/cn";
 
 export type FeatureItem = {
@@ -25,19 +30,32 @@ export default function FeatureGrid({
 
   return (
     <div className={cn("grid gap-5", col, className)}>
-      {items.map((item) => (
-        <div
+      {items.map((item, i) => (
+        <motion.div
           key={item.title}
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{
+            duration: 0.45,
+            delay: i * 0.05,
+          }}
           className="rounded-2xl border border-border bg-card/80 p-5 backdrop-blur-sm"
         >
           {item.icon ? (
-            <div className="mb-3 text-foreground/90">{item.icon}</div>
+            <div className="mb-3 text-foreground/90">
+              {item.icon}
+            </div>
           ) : null}
-          <h3 className="text-base font-semibold text-foreground">{item.title}</h3>
+
+          <h3 className="text-base font-semibold text-foreground">
+            {item.title}
+          </h3>
+
           <p className="mt-2 text-sm leading-relaxed text-foreground/70">
             {item.body}
           </p>
-        </div>
+        </motion.div>
       ))}
     </div>
   );

@@ -1,37 +1,43 @@
+"use client";
+
 import * as React from "react";
 import Link from "next/link";
+
 import { ArrowRight } from "lucide-react";
+
 import MarketingShell from "@/components/marketing/MarketingShell";
 import MarketingSectionHeader from "@/components/marketing/MarketingSectionHeader";
 import FeatureGrid from "@/components/marketing/FeatureGrid";
-import TwoColumnCompare from "@/components/marketing/TwoColumnCompare";
+import PhaseTimeline from "@/components/marketing/PhaseTimeline";
+
 import { MARKETING } from "@/lib/marketing/links";
-import { marketingContainerClass, marketingHeroClass } from "@/lib/marketing/layout";
+
+import {
+  marketingContainerClass,
+} from "@/lib/marketing/layout";
+
 import { cn } from "@/lib/utils/cn";
 
-function CtaButton({
+function Cta({
   href,
   children,
-  variant = "primary",
-  className,
+  primary = true,
 }: {
   href: string;
   children: React.ReactNode;
-  variant?: "primary" | "secondary";
-  className?: string;
+  primary?: boolean;
 }) {
   return (
     <Link
       href={href}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-        variant === "primary"
-          ? "text-white shadow-[0_10px_30px_-12px_hsl(var(--cyan-500)/0.45)] hover:opacity-95"
-          : "border border-white/10 bg-white/3 text-foreground/85 backdrop-blur-sm hover:border-white/15 hover:bg-white/5 hover:text-foreground",
-        className
+        "inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition",
+        primary
+          ? "text-white hover:opacity-95"
+          : "border border-white/10 bg-white/3 text-foreground/85 hover:bg-white/6"
       )}
       style={
-        variant === "primary"
+        primary
           ? {
               background:
                 "linear-gradient(90deg, hsl(var(--brand-600)), hsl(var(--cyan-500)))",
@@ -40,332 +46,257 @@ function CtaButton({
       }
     >
       {children}
+
       <ArrowRight className="h-4 w-4" />
     </Link>
   );
 }
 
-export default function HomeMarketing() {
-  const modelPhases = [
+export default function EcosystemPage() {
+  const overviewSteps = [
     {
       title: "Foundation Layer",
-      body: "Build professional readiness, digital foundations, AI-native productivity, and execution fundamentals.",
+      body: "Professional readiness, analytical thinking, digital engineering foundations, AI-native workflows, and execution systems.",
     },
     {
       title: "Pathway Immersion",
-      body: "Explore specialized future-focused pathways across AI, data, design, cloud systems, and smart engineering.",
+      body: "Specialized future-focused domains aligned with AI, analytics, design, cloud systems, engineering, and intelligent infrastructure.",
     },
     {
       title: "Qualification Layer",
-      body: "Strengthen technical capability through collaborative projects, advanced workflows, and execution assessments.",
+      body: "Collaborative projects, technical assessments, advanced workflows, and squad readiness systems.",
     },
     {
-      title: "Integrated Residency",
-      body: "Operate in startup-style squads, build production systems, and work inside real execution environments.",
+      title: "Integrated Residency & Production",
+      body: "Startup-style execution environments where students work in squads and build production-oriented systems.",
     },
     {
       title: "Career Launch Week",
-      body: "Participate in demo days, hiring challenges, portfolio showcases, recruiter reviews, and opportunity networks.",
+      body: "Demo days, portfolio showcases, hiring challenges, recruiter interactions, and opportunity systems.",
+    },
+    {
+      title: "Fellowship & Advanced Tracks",
+      body: "Advanced residencies, startup squads, deployment opportunities, and future innovation pathways.",
     },
   ];
 
-  const pathwayCards = [
+  const foundation = [
+    {
+      title: "Career Readiness Foundations",
+      body: "Communication, presentations, professional identity, LinkedIn optimization, collaboration readiness.",
+    },
+    {
+      title: "Analytical Intelligence Systems",
+      body: "Logical thinking, quantitative reasoning, structured problem solving.",
+    },
+    {
+      title: "Digital Engineering Foundations",
+      body: "Programming logic, computational thinking, APIs, debugging, engineering workflows.",
+    },
+    {
+      title: "Modern Development Workflows",
+      body: "Git, GitHub, documentation, collaboration workflows, deployment awareness.",
+    },
+    {
+      title: "AI-Native Workflow Systems",
+      body: "Prompt engineering, AI-assisted productivity, intelligent research, automation fundamentals.",
+    },
+    {
+      title: "Startup Execution Systems",
+      body: "Sprint systems, agile workflows, accountability culture, team collaboration.",
+    },
+  ];
+
+  const pathwayImmersion = [
     {
       title: "Intelligent Software & AI Systems",
-      body: "Build AI-powered applications, automation systems, SaaS platforms, and intelligent workflows.",
+      body: "AI applications, SaaS systems, automation workflows, cloud infrastructure, intelligent products.",
     },
     {
       title: "Data Intelligence & AI Analytics",
-      body: "Work with analytics systems, dashboards, forecasting, business intelligence, and AI-powered insights.",
+      body: "Dashboards, analytics, AI reporting, forecasting, machine learning, data infrastructure.",
     },
     {
       title: "Digital Experience & Creative AI",
-      body: "Design modern digital experiences, AI-assisted creative systems, immersive interfaces, and intelligent products.",
+      body: "UI/UX, immersive experiences, AI media workflows, product design, digital branding.",
     },
     {
       title: "Cloud Infrastructure & Cyber Systems",
-      body: "Learn scalable infrastructure, deployment systems, security workflows, cloud operations, and intelligent infrastructure management.",
+      body: "Scalable deployment, infrastructure, cybersecurity, cloud workflows, intelligent operations.",
     },
     {
       title: "Applied Engineering & Smart Systems",
-      body: "Build IoT systems, automation workflows, smart infrastructure, robotics systems, and industrial AI applications.",
+      body: "IoT, robotics, industrial AI, embedded systems, automation, smart infrastructure.",
     },
   ];
 
-  const residencyFeatures = [
+  const qualification = [
+    {
+      title: "Advanced Projects",
+      body: "Increasingly complex systems aligned with specialization pathways.",
+    },
+    {
+      title: "Collaborative Execution",
+      body: "Team-based workflows, sprint collaboration, technical reviews, interdisciplinary contribution.",
+    },
+    {
+      title: "Technical Assessments",
+      body: "Execution-focused evaluations around practical implementation and project systems.",
+    },
+    {
+      title: "Mentor Guidance",
+      body: "Feedback from technical mentors, pathway specialists, and execution reviewers.",
+    },
+    {
+      title: "Squad Readiness",
+      body: "Preparation for startup-style residency workflows and production collaboration.",
+    },
+  ];
+
+  const residency = [
     {
       title: "Squad-Based Collaboration",
-      body: "Interdisciplinary teams working on real systems and collaborative execution.",
+      body: "Interdisciplinary teams operating like modern startup product squads.",
     },
     {
-      title: "Sprint Workflows",
-      body: "Agile execution systems, reviews, accountability cycles, and structured delivery.",
+      title: "Sprint Systems",
+      body: "Agile execution cycles, accountability workflows, blocker reviews, delivery systems.",
     },
     {
-      title: "AI-Native Workflows",
-      body: "Prompt engineering, AI productivity systems, automation workflows, and intelligent execution tools.",
-    },
-    {
-      title: "Production Outputs",
-      body: "AI assistants, dashboards, SaaS prototypes, automation systems, engineering projects, and deployable platforms.",
+      title: "Production Workflows",
+      body: "Deployable systems instead of isolated academic assignments.",
     },
     {
       title: "Mentor Reviews",
-      body: "Technical mentors, industry guidance, and execution feedback systems.",
+      body: "Guidance from technical mentors, industry reviewers, and residency coordinators.",
+    },
+    {
+      title: "AI-Native Execution",
+      body: "AI-assisted productivity, automation, intelligent workflows, modern operational tools.",
     },
     {
       title: "Public Proof-Of-Work",
-      body: "GitHub repositories, deployed projects, portfolios, presentations, and case studies.",
+      body: "Repositories, deployment links, documentation, portfolio ecosystems.",
     },
   ];
 
-  const outcomeItems = [
+  const careerLaunch = [
     {
-      title: "Professional Identity",
-      body: "LinkedIn optimization, resume systems, presentation capability, communication readiness.",
+      title: "Portfolio Showcase",
+      body: "Projects, deployments, dashboards, repositories, and case studies.",
     },
     {
-      title: "Technical Capability",
-      body: "Modern development workflows, collaborative systems, deployment environments, AI-native productivity.",
+      title: "Hiring Challenges",
+      body: "Execution-oriented technical challenges aligned with pathway specializations.",
     },
     {
-      title: "Production Experience",
-      body: "Sprint execution, team collaboration, project systems, and real-world workflows.",
+      title: "Mock Interviews",
+      body: "Technical reviews, communication assessments, execution-focused evaluations.",
     },
     {
-      title: "Portfolio Ecosystem",
-      body: "GitHub repositories, deployed applications, dashboards, AI systems, and visible proof-of-work.",
+      title: "Demo Day",
+      body: "Startup-style showcase featuring deployable systems and production outputs.",
     },
     {
-      title: "Career Readiness",
-      body: "Internship readiness, hiring preparation, recruiter visibility, and professional confidence.",
+      title: "Recruiter Interactions",
+      body: "Portfolio reviews, squad discussions, hiring evaluations, opportunity discovery.",
     },
     {
-      title: "Future Adaptability",
-      body: "AI-native workflows, intelligent systems exposure, interdisciplinary thinking, and continuous learning capability.",
+      title: "Opportunity Matching",
+      body: "Internships, fellowships, advanced residencies, startup squads, deployment opportunities.",
     },
   ];
 
-  const institutionBenefits = [
+  const fellowship = [
     {
-      title: "Employability Transformation",
-      body: "Improve practical capability, portfolio quality, and industry readiness.",
+      title: "Advanced Residencies",
+      body: "Deeper production-oriented execution and collaborative project environments.",
     },
     {
-      title: "AI Readiness",
-      body: "Introduce students to intelligent workflows, AI systems, and future-ready productivity tools.",
+      title: "Startup Squads",
+      body: "Internal innovation teams on advanced systems and scalable product ecosystems.",
     },
     {
-      title: "Innovation Culture",
-      body: "Enable startup-style collaboration, production systems, and interdisciplinary execution environments.",
+      title: "Innovation Tracks",
+      body: "AI systems, intelligent infrastructure, analytics ecosystems, automation, applied engineering.",
     },
     {
-      title: "Portfolio Ecosystems",
-      body: "Create visible proof-of-work through deployable projects and execution systems.",
+      title: "Fellowship Programs",
+      body: "Structured contributor ecosystems for advanced capability and leadership.",
     },
     {
-      title: "Industry Alignment",
-      body: "Bridge the gap between academic systems and modern workforce expectations.",
+      title: "Research & Experimentation",
+      body: "Applied AI, experimentation workflows, intelligent engineering, future technology exploration.",
     },
-    {
-      title: "Flexible Integration",
-      body: "Integrate through innovation cells, CRT systems, incubation centers, and institutional initiatives.",
-    },
+  ];
+
+  const outcomesStudents = [
+    "Deployable portfolios",
+    "AI-native workflows",
+    "Execution confidence",
+    "Collaborative capability",
+    "Production experience",
+  ];
+
+  const outcomesInst = [
+    "Employability transformation",
+    "Innovation ecosystem development",
+    "AI readiness",
+    "Portfolio visibility",
+    "Industry alignment",
+  ];
+
+  const outcomesIndustry = [
+    "Execution-ready talent",
+    "Proof-of-work validation",
+    "Reduced onboarding burden",
+    "AI-native workforce readiness",
   ];
 
   return (
     <MarketingShell>
-      {/* 1 Hero */}
       <section className="py-16 sm:py-24">
-        <div className={marketingContainerClass}>
-          <div
-            className={marketingHeroClass}
-          >
-            <p className="text-sm font-semibold tracking-wide text-foreground/70">
-              AI-native execution ecosystem
-            </p>
-            <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-              <span className="bg-linear-to-l from-[hsl(var(--brand-600))] to-[hsl(var(--cyan-500))] bg-clip-text text-transparent">
-                AI-Native Execution Ecosystem For Future-Ready Talent
-              </span>
-            </h1>
-            <p className="mt-6 text-lg leading-relaxed text-foreground/75 sm:text-xl">
-              Sophrion transforms students into execution-ready professionals through
-              production-oriented learning, startup-style collaboration, AI-native workflows,
-              and deployable proof-of-work systems.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <CtaButton href={MARKETING.ecosystem}>Explore Ecosystem</CtaButton>
-              <CtaButton href={MARKETING.institutions} variant="secondary">
-                Partner With Sophrion
-              </CtaButton>
-            </div>
-            <p className="mt-6 text-sm text-foreground/55">
-              Built for students, institutions, innovation ecosystems, and the future workforce.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* 2 Problem */}
-      <section className="border-t border-white/10 py-16 sm:py-20">
-        <div className={marketingContainerClass}>
-          <MarketingSectionHeader
-            eyebrow="THE EDUCATION GAP"
-            title="Modern Education Was Not Designed For The AI Era"
-            subtitle="Industries are evolving faster than traditional learning systems. While companies demand execution-ready talent, most students still graduate with limited real-world exposure, weak portfolios, and outdated workflows."
-          />
-          <div className="mt-12">
-            <TwoColumnCompare
-              leftTitle="Traditional Systems"
-              leftItems={[
-                "Theory-heavy learning",
-                "Isolated classroom environments",
-                "Certificate-driven evaluation",
-                "Limited practical execution",
-                "Weak portfolio visibility",
-                "Outdated workflows",
-              ]}
-              rightTitle="The Sophrion Ecosystem"
-              rightItems={[
-                "Production-oriented learning",
-                "AI-native workflows",
-                "Startup-style collaboration",
-                "Proof-of-work validation",
-                "Deployable projects",
-                "Execution-first systems",
-              ]}
-            />
-          </div>
-          <p className="mt-10 text-center text-sm text-foreground/65">
-            The future belongs to builders, contributors, and adaptive thinkers — not passive learning alone.
-          </p>
-        </div>
-      </section>
-
-      {/* 3 Sophrion Model */}
-      <section className="py-16 sm:py-20">
         <div className={marketingContainerClass}>
           <MarketingSectionHeader
             eyebrow="ECOSYSTEM ARCHITECTURE"
-            title="A Structured Career Acceleration Ecosystem"
-            subtitle="Sophrion combines learning, execution, production, mentorship, and talent acceleration into a unified ecosystem designed for the intelligent economy."
-            align="center"
+            title="A Structured Career Acceleration Ecosystem For The AI Era"
+            subtitle="Sophrion combines learning, execution, AI-native workflows, collaborative production systems, and talent acceleration into a unified ecosystem designed for future-ready workforce development."
           />
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {modelPhases.map((p, i) => (
-              <div
-                key={p.title}
-                className="rounded-2xl border border-border bg-card/70 p-5"
-              >
-                <p className="text-xs font-semibold uppercase tracking-widest text-foreground/50">
-                  Phase {i + 1}
-                </p>
-                <h3 className="mt-2 text-lg font-semibold text-foreground">{p.title}</h3>
-                <p className="mt-2 text-sm text-foreground/70">{p.body}</p>
-              </div>
-            ))}
-          </div>
-          <div className="mt-8 flex justify-center">
-            <CtaButton href={MARKETING.ecosystem} variant="secondary">
-              See full architecture
-            </CtaButton>
-          </div>
-        </div>
-      </section>
 
-      {/* 4 Pathways preview */}
-      <section className="border-t border-white/10 py-16 sm:py-20">
-        <div className={marketingContainerClass}>
-          <MarketingSectionHeader
-            eyebrow="FUTURE PATHWAYS"
-            title="Explore Future-Ready Domains"
-            subtitle="Sophrion pathways are designed around emerging technologies, intelligent systems, AI-native workflows, and execution-driven careers."
-          />
-          <div className="mt-10">
-            <FeatureGrid items={pathwayCards} columns={3} />
-          </div>
-          <div className="mt-10 flex justify-center">
-            <CtaButton href={MARKETING.pathways}>Explore All Pathways</CtaButton>
-          </div>
-        </div>
-      </section>
-
-      {/* 5 Residency */}
-      <section className="py-16 sm:py-20">
-        <div className={marketingContainerClass}>
-          <MarketingSectionHeader
-            eyebrow="EXECUTION ENVIRONMENT"
-            title="Startup Simulation + Production Residency"
-            subtitle="Students do not simply complete assignments. They collaborate in squads, participate in sprint systems, deploy projects, and contribute inside execution-driven production environments."
-            align="center"
-          />
-          <div className="mt-12">
-            <FeatureGrid items={residencyFeatures} columns={3} />
-          </div>
-          <div className="mt-10 flex justify-center">
-            <CtaButton href={MARKETING.residency} variant="secondary">
-              How residency works
-            </CtaButton>
-          </div>
-        </div>
-      </section>
-
-      {/* 6 Outcomes */}
-      <section className="border-t border-white/10 py-16 sm:py-20">
-        <div className={marketingContainerClass}>
-          <MarketingSectionHeader
-            eyebrow="TRANSFORMATION OUTCOMES"
-            title="Students Graduate With Visible Capability"
-            subtitle="Every student progresses through structured systems designed to build practical confidence, execution capability, portfolio visibility, and AI-native readiness."
-          />
-          <div className="mt-12">
-            <FeatureGrid items={outcomeItems} columns={3} />
-          </div>
-        </div>
-      </section>
-
-      {/* 7 Institutions */}
-      <section className="py-16 sm:py-20">
-        <div className={marketingContainerClass}>
-          <MarketingSectionHeader
-            eyebrow="INSTITUTIONAL ECOSYSTEMS"
-            title="Future-Ready Innovation Infrastructure For Institutions"
-            subtitle="Sophrion helps educational institutions modernize employability systems, AI readiness, innovation culture, and execution-oriented learning environments."
-            align="center"
-          />
-          <div className="mt-12">
-            <FeatureGrid items={institutionBenefits} columns={3} />
-          </div>
-          <div className="mt-10 flex flex-wrap justify-center gap-3">
-            <CtaButton href={MARKETING.institutions}>Partner With Sophrion</CtaButton>
-            <CtaButton href={MARKETING.ecosystem} variant="secondary">
-              Explore Ecosystem
-            </CtaButton>
-          </div>
-        </div>
-      </section>
-
-      {/* 8 Final CTA */}
-      <section className="border-t border-white/10 py-16 sm:pb-24">
-        <div className={marketingContainerClass}>
-          <div className="mx-auto max-w-4xl text-center">
-          <MarketingSectionHeader
-            align="center"
-            title="Build Beyond Traditional Education"
-            subtitle="Enter an AI-native execution ecosystem designed for the future workforce, intelligent systems, and innovation-driven careers."
-          />
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <CtaButton href={MARKETING.join}>Join Ecosystem</CtaButton>
-            <CtaButton href={MARKETING.institutions} variant="secondary">
-              Start Institutional Pilot
-            </CtaButton>
-          </div>
-          <p className="mt-8 text-sm text-foreground/55">
-            Sophrion is building the next generation of execution-ready talent through AI-native,
-            production-oriented learning ecosystems.
+          <p className="mt-4 max-w-2xl text-sm text-foreground/60">
+            Built for students, institutions,
+            innovation ecosystems, and intelligent
+            industries.
           </p>
+
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Cta href={MARKETING.pathways}>
+              Explore Pathways
+            </Cta>
+
+            <Cta
+              href={MARKETING.residency}
+              primary={false}
+            >
+              Explore Residency
+            </Cta>
           </div>
+        </div>
+      </section>
+
+      <section className="border-t border-white/10 py-16">
+        <div className={marketingContainerClass}>
+          <MarketingSectionHeader
+            eyebrow="HOW SOPHRION WORKS"
+            title="A Progressive Multi-Layer Transformation System"
+            subtitle="Students progress through structured layers designed to build technical capability, execution confidence, collaborative workflows, AI-native productivity, and visible proof-of-work."
+            align="center"
+          />
+
+          <PhaseTimeline
+            steps={overviewSteps}
+            className="mt-12"
+          />
         </div>
       </section>
     </MarketingShell>

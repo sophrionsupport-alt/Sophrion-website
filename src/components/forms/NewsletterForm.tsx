@@ -8,8 +8,17 @@ type ApiFail = { ok: false; error?: string; message?: string };
 type ApiResp<T = unknown> = ApiOk<T> | ApiFail;
 
 function getErrMessage(payload: unknown) {
+
   const m = parseApiErrorMessage(payload);
   if (m !== "Something went wrong. Please try again.") return m;
+
+  if (payload && typeof payload === "object") {
+    const o = payload as { error?: unknown; message?: unknown };
+    const err = typeof o.error === "string" ? o.error : undefined;
+    const msg = typeof o.message === "string" ? o.message : undefined;
+    return err || msg || "Could not subscribe right now. Please try again.";
+  }
+
   return "Could not subscribe right now. Please try again.";
 }
 
