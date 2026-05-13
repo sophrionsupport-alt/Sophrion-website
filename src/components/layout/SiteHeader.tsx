@@ -25,7 +25,7 @@ export default function SiteHeader({ className }: Props) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 transition-all duration-300",
+        "relative z-50 sticky top-0 transition-all duration-300",
         scrolled
           ? [
               "border-b border-white/12",
@@ -92,7 +92,7 @@ export default function SiteHeader({ className }: Props) {
                 {isAdminRoute ? "Sophrion Admin" : "Sophrion"}
               </div>
               <div className="truncate text-xs text-foreground/60">
-                {isAdminRoute ? "Operations Console" : "Future Within"}
+                {isAdminRoute ? "Operations Console" : "Future-Ready Execution Ecosystem"}
               </div>
             </div>
           </Link>

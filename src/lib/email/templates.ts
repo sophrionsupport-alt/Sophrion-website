@@ -70,7 +70,7 @@ function getRegistrationEventName(payload: RegistrationPayload & {
   event_name?: string;
   event_title?: string;
 }) {
-  return payload.event_name || payload.event_title || payload.event_id;
+  return payload.event_name || payload.event_title || payload.event_id || "Event";
 }
 
 export function contactInboxEmail(payload: ContactPayload) {

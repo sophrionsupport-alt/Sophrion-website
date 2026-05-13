@@ -8,12 +8,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const staticRoutes = [
     "",
-    "/students",
-    "/colleges",
     "/about",
+    "/ecosystem",
+    "/pathways",
+    "/residency",
+    "/institutions",
+    "/join",
     "/contact",
     "/blog",
-    "/events",
     "/privacy",
   ];
 
