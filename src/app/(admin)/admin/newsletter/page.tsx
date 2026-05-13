@@ -133,6 +133,7 @@ export default function NewsletterPage() {
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- updateStatus is defined below and calls load()
   }, [filters]);
 
   async function updateStatus(id: string, status: "active" | "unsubscribed") {

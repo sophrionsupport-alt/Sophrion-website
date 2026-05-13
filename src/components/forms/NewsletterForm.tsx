@@ -6,8 +6,14 @@ type ApiOk<T = unknown> = { ok: true; data?: T; message?: string };
 type ApiFail = { ok: false; error?: string; message?: string };
 type ApiResp<T = unknown> = ApiOk<T> | ApiFail;
 
-function getErrMessage(payload: any) {
-  return payload?.error || payload?.message || "Could not subscribe right now. Please try again.";
+function getErrMessage(payload: unknown) {
+  if (payload && typeof payload === "object") {
+    const o = payload as { error?: unknown; message?: unknown };
+    const err = typeof o.error === "string" ? o.error : undefined;
+    const msg = typeof o.message === "string" ? o.message : undefined;
+    return err || msg || "Could not subscribe right now. Please try again.";
+  }
+  return "Could not subscribe right now. Please try again.";
 }
 
 function cn(...classes: Array<string | false | undefined | null>) {
@@ -39,12 +45,12 @@ export default function NewsletterForm(props: { source?: string; className?: str
 
       const json = (await res.json().catch(() => ({}))) as ApiResp;
 
-      if (!res.ok || (json as any)?.ok === false) {
+      if (!res.ok || !json.ok) {
         setErrorMsg(getErrMessage(json));
         return;
       }
 
-      setSuccessMsg((json as any)?.message || "Subscribed.");
+      setSuccessMsg(json.message || "Subscribed.");
       setEmail("");
     } catch {
       setErrorMsg("Network error. Please try again.");

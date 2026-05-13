@@ -50,7 +50,7 @@ export default function EventVolunteersPage() {
   const [expiresAt, setExpiresAt] = React.useState("");
   const [latestCode, setLatestCode] = React.useState<string | null>(null);
 
-  async function loadVolunteers() {
+  const loadVolunteers = React.useCallback(async () => {
     if (!eventId) {
       setRows([]);
       setLoading(false);
@@ -81,11 +81,11 @@ export default function EventVolunteersPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [eventId]);
 
   React.useEffect(() => {
-    loadVolunteers();
-  }, [eventId]);
+    void loadVolunteers();
+  }, [loadVolunteers]);
 
   async function createVolunteer(e: React.FormEvent) {
     e.preventDefault();

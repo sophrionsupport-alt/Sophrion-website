@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import Nav from "./Nav";
 import { cn } from "@/lib/utils/cn";
@@ -81,9 +82,11 @@ export default function SiteHeader({ className }: Props) {
             href={isAdminRoute ? "/admin" : "/"}
             className="inline-flex min-w-0 shrink-0 items-center gap-3"
           >
-            <img
+            <Image
               src="/images/brand/symbol-logo.png"
               alt="Sophrion"
+              width={36}
+              height={36}
               className="h-9 w-9 object-contain"
             />
 

@@ -11,10 +11,6 @@ type Props = {
   nextPath: string;
 };
 
-function cn(...classes: Array<string | false | null | undefined>) {
-  return classes.filter(Boolean).join(" ");
-}
-
 export default function LoginClient({ nextPath }: Props) {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");

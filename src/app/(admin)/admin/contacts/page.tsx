@@ -65,7 +65,6 @@ export default function ContactsPage() {
 
   const [loading, setLoading] = React.useState(true);
   const [rows, setRows] = React.useState<AdminRow[]>([]);
-  const [raw, setRaw] = React.useState<ContactRecord[]>([]);
   const [error, setError] = React.useState<string | null>(null);
 
   const [open, setOpen] = React.useState(false);
@@ -105,8 +104,6 @@ export default function ContactsPage() {
         ? payload.data.rows
         : [];
 
-      setRaw(list);
-
       const mapped: AdminRow[] = list.map((c) => ({
         id: c.id,
         primary: c.name || "Unknown",
@@ -136,11 +133,11 @@ export default function ContactsPage() {
     } catch (e) {
       console.error(e);
       setRows([]);
-      setRaw([]);
       setError(e instanceof Error ? e.message : "Failed to load contacts.");
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- toggleArchive is defined below and calls load(); including it would cycle deps
   }, [filters]);
 
   async function toggleArchive(id: string, archived: boolean) {
@@ -203,7 +200,13 @@ export default function ContactsPage() {
         </div>
       ) : null}
 
-      <AdminTable rows={rows}  />
+      {loading ? (
+        <div className="rounded-2xl border border-border bg-background/40 p-6 text-sm text-foreground/70">
+          Loading messages…
+        </div>
+      ) : (
+        <AdminTable rows={rows} />
+      )}
 
       <Modal open={open} onClose={() => setOpen(false)} title="Contact Message">
         {active ? (

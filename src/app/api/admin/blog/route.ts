@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 
 function json(
   ok: boolean,
-  init?: { data?: any; error?: string; message?: string },
+  init?: { data?: unknown; error?: string; message?: string },
   status = 200
 ) {
   return NextResponse.json({ ok, ...init }, { status });
@@ -92,10 +92,12 @@ export async function POST(req: Request) {
     return json(false, { error: auth.error }, auth.error === "Forbidden" ? 403 : 401);
   }
 
-  let body: any = {};
+  let body: Record<string, unknown> = {};
   try {
-    body = await req.json();
-  } catch {}
+    body = (await req.json()) as Record<string, unknown>;
+  } catch {
+    body = {};
+  }
 
   const title = String(body?.title ?? "").trim();
   const excerpt = String(body?.excerpt ?? "").trim() || null;

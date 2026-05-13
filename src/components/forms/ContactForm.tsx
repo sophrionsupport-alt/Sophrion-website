@@ -25,8 +25,14 @@ function cn(...classes: Array<string | false | undefined | null>) {
   return classes.filter(Boolean).join(" ");
 }
 
-function getErrMessage(payload: any) {
-  return payload?.error || payload?.message || "Submission failed. Please try again.";
+function getErrMessage(payload: unknown) {
+  if (payload && typeof payload === "object") {
+    const o = payload as { error?: unknown; message?: unknown };
+    const err = typeof o.error === "string" ? o.error : undefined;
+    const msg = typeof o.message === "string" ? o.message : undefined;
+    return err || msg || "Submission failed. Please try again.";
+  }
+  return "Submission failed. Please try again.";
 }
 
 export default function ContactForm() {
@@ -100,8 +106,8 @@ export default function ContactForm() {
 
       setResult({ ok: true, message: json?.message || "Thanks — we received your message." });
       setForm({ name: "", email: "", subject: "", message: "", company: "" });
-    } catch (err: any) {
-      setResult({ ok: false, message: err?.message || "Something went wrong." });
+    } catch (err: unknown) {
+      setResult({ ok: false, message: err instanceof Error ? err.message : "Something went wrong." });
     } finally {
       setLoading(false);
     }

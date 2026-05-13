@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import EventPublishingRequestForm from "@/components/forms/EventPublishingRequestForm";
 
 export const metadata: Metadata = {

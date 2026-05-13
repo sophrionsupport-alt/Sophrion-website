@@ -41,7 +41,7 @@ export default function EventsPage() {
     null
   );
 
-  async function loadEvents() {
+  const loadEvents = React.useCallback(async () => {
     try {
       setLoading(true);
 
@@ -83,7 +83,7 @@ export default function EventsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [filters.q, filters.status, filters.sort]);
 
   async function patchEvent(
     id: string,
@@ -189,8 +189,8 @@ export default function EventsPage() {
   }
 
   React.useEffect(() => {
-    loadEvents();
-  }, [filters.q, filters.status, filters.sort]);
+    void loadEvents();
+  }, [loadEvents]);
 
   return (
     <div className="space-y-6">

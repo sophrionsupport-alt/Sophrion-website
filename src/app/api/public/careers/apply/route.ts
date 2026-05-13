@@ -192,7 +192,7 @@ export async function POST(req: Request) {
 
     const supabase = supabaseAdmin();
 
-    let roleId: string | null = payload.role_id ?? null;
+    const roleId: string | null = payload.role_id ?? null;
     let roleTitleSnapshot: string | null = payload.role_title_snapshot ?? null;
 
     if (roleId) {
