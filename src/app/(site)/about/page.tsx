@@ -24,7 +24,7 @@ export default function Page() {
             className="max-w-3xl"
           >
             <p className="text-sm font-semibold tracking-wide text-foreground/70">
-              About Sophrion
+              About Sophrions
             </p>
 
             <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
