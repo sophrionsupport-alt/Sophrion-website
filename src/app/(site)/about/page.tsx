@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { motion } from "motion/react";
-import { Shield, Users, Target, Award } from "lucide-react";
+import Link from "next/link";
+import { Shield, Users, Target, Award, ArrowRight } from "lucide-react";
 
 export default function Page() {
   return (
@@ -28,7 +29,7 @@ export default function Page() {
 
             <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
               <span className="bg-linear-to-l from-[hsl(var(--brand-600))] to-[hsl(var(--cyan-500))] bg-clip-text text-transparent">
-                       Institutional Readiness Intelligence
+                Institutional Readiness Intelligence
               </span>{" "}
               — built for outcomes
             </h1>
@@ -37,7 +38,73 @@ export default function Page() {
               Sophrion exists to bridge the campus–industry gap by turning placement preparation into a measurable,
               repeatable system — simple enough for adoption, strong enough for scale.
             </p>
+
+            <div className="mt-7 flex flex-wrap items-center gap-3">
+              <Link
+                href="/contact"
+                className="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                style={{
+                  background:
+                    "linear-gradient(90deg, hsl(var(--brand-600)), hsl(var(--cyan-500)))",
+                }}
+              >
+                Talk to us
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+
+              <Link
+                href="/products"
+                className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/3 px-4 py-2.5 text-sm font-semibold text-foreground/85 backdrop-blur-sm transition hover:border-white/15 hover:bg-white/5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                Explore products
+              </Link>
+            </div>
           </motion.div>
+        </div>
+      </section>
+
+      {/* What we do */}
+      <section className="py-14 sm:py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -18 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.6 }}
+            >
+              <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+                What we do
+              </h2>
+              <p className="mt-4 leading-relaxed text-foreground/70">
+                We help institutions and student teams run readiness like an
+                operating system — assess consistently, deliver targeted
+                interventions, and track progress over time.
+              </p>
+              <p className="mt-4 leading-relaxed text-foreground/70">
+                The result is fewer blind spots and a clearer path from baseline
+                skills to placement outcomes.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 18 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.6 }}
+              className="rounded-3xl border border-border bg-white/3 p-6 backdrop-blur sm:p-8"
+            >
+              <h3 className="text-lg font-semibold text-foreground">
+                Designed for real operations
+              </h3>
+              <ul className="mt-4 space-y-3 text-sm text-foreground/70">
+                <li>• Clear readiness definition and scoring</li>
+                <li>• Repeatable workflows across batches</li>
+                <li>• Coordinator-friendly reporting</li>
+                <li>• Early interventions, not last-minute fixes</li>
+              </ul>
+            </motion.div>
+          </div>
         </div>
       </section>
 
@@ -112,6 +179,45 @@ export default function Page() {
                 <li>• Repeatable processes across departments</li>
               </ul>
             </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-14 sm:py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="rounded-3xl border border-white/10 bg-white/3 p-6 backdrop-blur sm:p-10">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="max-w-2xl">
+                <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                  Want to partner with Sophrion?
+                </h2>
+                <p className="mt-2 text-sm leading-relaxed text-foreground/70">
+                  If you’re a college leader, placement coordinator, or a team
+                  building student outcomes — let’s talk.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  style={{
+                    background:
+                      "linear-gradient(90deg, hsl(var(--brand-600)), hsl(var(--cyan-500)))",
+                  }}
+                >
+                  Contact
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  href="/services"
+                  className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/3 px-4 py-2.5 text-sm font-semibold text-foreground/85 backdrop-blur-sm transition hover:border-white/15 hover:bg-white/5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  View services
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>

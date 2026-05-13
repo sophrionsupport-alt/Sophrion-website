@@ -1,0 +1,94 @@
+
+############################################
+# BRANDING / DOMAIN
+############################################
+SITE_NAME="Sophrion"
+CANONICAL_DOMAIN="https://sophrion.in"
+WWW_REDIRECT_ENABLED="true"
+
+############################################
+# SUPABASE
+############################################
+NEXT_PUBLIC_SUPABASE_URL="https://pvxtnrowtqzrqvidmdtl.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB2eHRucm93dHF6cnF2aWRtZHRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyOTQyODAsImV4cCI6MjA4Nzg3MDI4MH0.QQV-rOjJpau_lScqDS8-zbekgz6IuJhq-bynIAqhnUc"
+
+SUPABASE_SERVICE_ROLE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB2eHRucm93dHF6cnF2aWRtZHRsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjI5NDI4MCwiZXhwIjoyMDg3ODcwMjgwfQ.0DcBdlgLDGMJxtsjwbvN0BMgJ1GoZTPf1tOaj3ZFVNU"
+
+############################################
+# EMAIL (ZOHO ZEPTOMAIL)
+############################################
+EMAIL_PROVIDER="zeptomail"
+ZEPTOMAIL_HOST="https://api.zeptomail.in"
+ZEPTOMAIL_API_KEY="PHtE6r0MFOnjj25690BR4vS7FJGsNtkn/+9iKlRC5IdCXKcGHU1S+o19wGTkrB97XaFCHPHOwd5v4L/NtrmMImjuPTtEW2qyqK3sx/VYSPOZsbq6x00VuFsadEzdUIfpe9Zu0iTQutrYNA=="
+ZEPTO_MAIL_TOKEN = "PHtE6r0IE7u6jDF9+kMCtvK8EMbwZ98mqeNnelMU444UAqJXHU0E/415m2Kyrkp/APNGQfObnIhvuOyasrqEdDzsZm0YCmqyqK3sx/VYSPOZsbq6x00ctVkadUzaVIXodNVo1yHWvNfeNA=="
+ZEPTOMAIL_FROM_EMAIL="noreply@sophrion.in"
+ZEPTOMAIL_FROM_NAME="Sophrion"
+
+EMAIL_FROM_NOREPLY="Sophrion <noreply@sophrion.in>"
+EMAIL_FROM_CONTACT="Sophrion Support <support@sophrion.in>"
+CONTACT_INBOX="contact@sophrion.in"
+CAREERS_ADMIN_EMAIL="careers@sophrion.in"
+TICKET_TOKEN_SECRET="9d8f2a4b7c1e5f6a8b3c9d0e2f4a6b8c1d3e5f7a9b2c4d6e8f1a3b5c7d9e0f2"
+TICKET_BACKUP_EMAIL="admin@sophrion.in"
+
+############################################
+# RATE LIMITING (UPSTASH REDIS)
+############################################
+UPSTASH_REDIS_REST_URL="https://wanted-troll-64148.upstash.io"
+UPSTASH_REDIS_REST_TOKEN="AfqUAAIncDE5YTZiZjExOTI0Mjg0YjA3Yjg2ZmM1MTYzZWMzZmI1NHAxNjQxNDg"
+
+RATE_LIMIT_CONTACT_PER_IP_PER_MIN="5"
+RATE_LIMIT_CONTACT_PER_EMAIL_PER_MIN="3"
+
+RATE_LIMIT_NEWSLETTER_PER_IP_PER_MIN="5"
+RATE_LIMIT_NEWSLETTER_PER_EMAIL_PER_MIN="3"
+
+RATE_LIMIT_REGISTRATION_PER_IP_PER_MIN="3"
+RATE_LIMIT_REGISTRATION_PER_EMAIL_PER_MIN_PER_EVENT="2"
+
+############################################
+# TURNSTILE (CLOUDFLARE)
+############################################
+NEXT_PUBLIC_TURNSTILE_SITE_KEY="0x4AAAAAACj-jREap5-Isv9f"
+NEXT_PUBLIC_TURNSTILE_ENABLED="false"
+
+TURNSTILE_SECRET_KEY="0x4AAAAAACj-jfY_pr5nk4nAe-jlsIsTuPw"
+TURNSTILE_ENABLED="false"
+
+############################################
+# ADMIN SEEDING
+############################################
+SEED_ADMIN_EMAILS="srikanthmolugu8@gmail.com,ceo@sophrion.in,admin@sophrion.in"
+DEFAULT_ADMIN_ROLE="global_admin"
+
+############################################
+# COLLEGE SYSTEM CONFIG
+############################################
+COLLEGE_ONBOARDING_MODE="both"         # access_request | invite_only | both
+COLLEGE_CAN_PUBLISH="false"
+PUBLISH_MODE="admin_only"
+
+############################################
+# REGISTRATION REQUIREMENTS
+############################################
+REG_REQUIRED_FIELDS="name,email,phone,college,year,roll_number"
+
+############################################
+# CONTENT / LMS / CAREERS
+############################################
+CAREERS_TYPES="intern,full_time,contract"
+LEARN_TAGS="Aptitude,DSA,Core CS,Web Development,Data & AI,Communication,Interview Prep,Resume & LinkedIn,Mock Interviews,Placement Packs"
+
+############################################
+# BLOG
+############################################
+BLOG_ENGINE="mdx"
+BLOG_INITIAL_POSTS="what-sophrion-solves-for-colleges,readiness-tracking-improves-placements,crt-programs-what-works,student-roadmap-to-placement"
+
+############################################
+# LEGAL
+############################################
+LEGAL_TERMS_ENABLED="true"
+LEGAL_REFUND_CANCELLATION_ENABLED="true"
+LEGAL_COOKIE_POLICY_ENABLED="false"
+
